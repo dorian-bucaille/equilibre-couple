@@ -27,7 +27,7 @@ export const InputField: React.FC<Props> = ({
           id={id}
           type="number"
           inputMode="decimal"
-          className="w-full rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
+          className="input"
           value={Number.isFinite(value) ? value : 0}
           onChange={(e) => onChange(parseFloat(e.target.value || "0"))}
           min={min}

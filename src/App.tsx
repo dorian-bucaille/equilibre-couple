@@ -16,7 +16,7 @@ const DEFAULTS: Inputs = {
   m: 1500,
   advanced: true, // tu as validé le mode avancé
   E: 600,
-  biasPts: 0
+  biasPts: 0,
 };
 
 function parseQuery(defaults: Inputs): Inputs {
@@ -72,18 +72,18 @@ export default function App() {
   const printPDF = () => window.print();
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-4">
+    <div className="max-w-3xl mx-auto p-6 space-y-5">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Équilibre couple – calculateur</h1>
+        <h1 className="text-2xl font-bold">Équilibre couple — calculateur</h1>
         <div className="no-print flex items-center gap-2">
           <ThemeToggle />
-          <button onClick={copyLink} className="px-3 py-2 rounded bg-gray-200 dark:bg-gray-800">Copier le lien</button>
-          <button onClick={printPDF} className="px-3 py-2 rounded bg-gray-200 dark:bg-gray-800">Imprimer / PDF</button>
-          <button onClick={reset} className="px-3 py-2 rounded bg-rose-600 text-white">Réinitialiser</button>
+          <button onClick={copyLink} className="btn btn-ghost">Copier le lien</button>
+          <button onClick={printPDF} className="btn btn-ghost">Imprimer / PDF</button>
+          <button onClick={reset} className="btn btn-danger">Réinitialiser</button>
         </div>
       </header>
 
-      <section className="rounded-lg border border-gray-200 dark:border-gray-800 p-4 space-y-3">
+      <section className="card space-y-3">
         <h2 className="text-lg font-semibold">Paramètres</h2>
 
         <div className="grid sm:grid-cols-2 gap-3">
@@ -109,7 +109,7 @@ export default function App() {
             value={inputs.a2}
             onChange={(v) => setInputs({ ...inputs, a2: v })}
             suffix="€ / mois"
-            tooltip="Montant mensuel brut de TR crédités"
+            tooltip="Montant mensuel brut de tickets restaurant crédités"
           />
           <InputField
             id="trPct"
@@ -142,7 +142,7 @@ export default function App() {
                 aria-label="Activer le mode avancé"
               />
               <span className="text-sm text-gray-500">
-                Permet de saisir E = dépenses éligibles TR (au-delà des TR)
+                Permet de saisir E = dépenses éligibles TR (au‑delà des TR)
               </span>
             </div>
           </label>
@@ -212,12 +212,13 @@ function ThemeToggle() {
 
   return (
     <button
-      className="px-3 py-2 rounded bg-gray-200 dark:bg-gray-800"
+      className="btn btn-ghost"
       onClick={() => setDark((d) => !d)}
       aria-pressed={dark}
       aria-label="Basculer mode sombre"
     >
-      {dark ? "☾" : "☼"}
+      {dark ? "🌙" : "☀️"}
     </button>
   );
 }
+

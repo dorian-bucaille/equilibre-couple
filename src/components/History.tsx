@@ -26,17 +26,17 @@ export const History: React.FC<{
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+    <div className="card">
       <h2 className="text-lg font-semibold mb-2">Historique local</h2>
 
       <div className="no-print flex flex-col sm:flex-row gap-2 mb-3">
         <input
           placeholder="Note (ex. Octobre 2025, loyer révisé...)"
-          className="flex-1 rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2"
+          className="flex-1 input"
           value={note}
           onChange={(e) => setNote(e.target.value)}
         />
-        <button onClick={add} className="px-3 py-2 rounded bg-blue-600 text-white">
+        <button onClick={add} className="btn btn-primary">
           Enregistrer
         </button>
       </div>
@@ -56,7 +56,7 @@ export const History: React.FC<{
               <div>Dépôts — D: {euro(result.depositD)} / M: {euro(result.depositM)}</div>
               <div className="text-gray-500">Cash: {euro(result.cashNeeded)} | TR: {euro(result.V)}</div>
             </div>
-            <button onClick={() => del(it.id)} className="no-print px-3 py-2 rounded bg-gray-200 dark:bg-gray-800">
+            <button onClick={() => del(it.id)} className="no-print btn btn-ghost">
               Suppr
             </button>
           </div>
@@ -65,3 +65,4 @@ export const History: React.FC<{
     </div>
   );
 };
+

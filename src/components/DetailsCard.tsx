@@ -4,9 +4,9 @@ import type { Result } from "../lib/types";
 export const DetailsCard: React.FC<{ r: Result }> = ({ r }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+    <div className="card">
       <button
-        className="no-print inline-flex items-center gap-2 text-sm px-3 py-2 rounded bg-gray-200 dark:bg-gray-800"
+        className="no-print btn btn-ghost"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >
@@ -38,3 +38,4 @@ export const DetailsCard: React.FC<{ r: Result }> = ({ r }) => {
     </div>
   );
 };
+

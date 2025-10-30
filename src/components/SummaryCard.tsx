@@ -4,7 +4,7 @@ import type { Result } from "../lib/types";
 
 export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
   return (
-    <div className="rounded-lg border border-gray-200 dark:border-gray-800 p-4">
+    <div className="card">
       <h2 className="text-lg font-semibold mb-2">Résumé</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div>
@@ -48,3 +48,4 @@ export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
     </div>
   );
 };
+
