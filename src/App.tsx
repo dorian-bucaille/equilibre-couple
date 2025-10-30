@@ -72,10 +72,12 @@ export default function App() {
   const printPDF = () => window.print();
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-5">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Équilibre couple — calculateur</h1>
-        <div className="no-print flex items-center gap-2">
+    <div className="max-w-3xl mx-auto space-y-5 px-4 py-6 sm:p-6">
+      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-center text-2xl font-bold md:text-left">
+          Équilibre couple — calculateur
+        </h1>
+        <div className="no-print flex flex-wrap items-center justify-center gap-2 md:justify-end">
           <ThemeToggle />
           <button onClick={copyLink} className="btn btn-ghost">Copier le lien</button>
           <button onClick={printPDF} className="btn btn-ghost">Imprimer / PDF</button>
@@ -136,7 +138,7 @@ export default function App() {
 
           <label className="flex flex-col gap-1">
             <span className="font-medium">Mode avancé</span>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <input
                 type="checkbox"
                 checked={inputs.advanced}
@@ -161,15 +163,16 @@ export default function App() {
           )}
           {inputs.advanced && (
             <label className="flex flex-col gap-1 sm:col-span-2">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <span className="font-medium">Ajustement du prorata (favoriser A ou B)</span>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 sm:text-right">
                   {inputs.biasPts === 0
                     ? "Neutre"
                     : inputs.biasPts > 0
                     ? `Favorise B (+${inputs.biasPts.toFixed(1)} pts)`
                     : `Favorise A (${inputs.biasPts.toFixed(1)} pts)`}
                 </span>
+                <span className="text-sm text-gray-500">+{inputs.biasPts.toFixed(1)} points pour le partenaire A</span>
               </div>
               <input
                 type="range"
