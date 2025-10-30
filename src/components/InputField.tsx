@@ -22,12 +22,12 @@ export const InputField: React.FC<Props> = ({
         <span className="font-medium">{label}</span>
         {tooltip ? <InfoIcon title={tooltip} /> : null}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <input
           id={id}
           type="number"
           inputMode="decimal"
-          className="input"
+          className="input w-full sm:w-auto sm:flex-1 min-w-0"
           value={Number.isFinite(value) ? value : 0}
           onChange={(e) => onChange(parseFloat(e.target.value || "0"))}
           min={min}
@@ -35,7 +35,9 @@ export const InputField: React.FC<Props> = ({
           step={step ?? 1}
           aria-describedby={tooltip ? `${id}-tip` : undefined}
         />
-        {suffix ? <span className="text-sm text-gray-500">{suffix}</span> : null}
+        {suffix ? (
+          <span className="text-sm text-gray-500 sm:whitespace-nowrap">{suffix}</span>
+        ) : null}
       </div>
     </label>
   );
