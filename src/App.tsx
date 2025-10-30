@@ -173,7 +173,7 @@ export default function App() {
               aria-label="Ajustement en faveur de Mariwenn"
             />
             <span className="text-xs text-gray-500">
-              Plus la valeur est élevée, plus Dorian prend de poids dans le prorata (=> il paie davantage en cash).
+              Plus la valeur est élevée, plus Dorian prend de poids dans le prorata ({'=>'} il paie davantage en cash).
             </span>
           </label>
         </div>
