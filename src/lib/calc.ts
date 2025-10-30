@@ -9,7 +9,18 @@ import type { Inputs, Result } from "./types";
  * - Dépôt partenaire A = max(0, contribEqD - V_A), partenaire B = cash - dépôt A.
  */
 export function calculate(inputs: Inputs): Result {
-  const { a1, a2, b2, trPct, b, m, advanced, E, biasPts } = inputs;
+  const toFinite = (value: unknown, fallback = 0) =>
+    typeof value === "number" && Number.isFinite(value) ? value : fallback;
+
+  const a1 = toFinite(inputs.a1);
+  const a2 = toFinite(inputs.a2);
+  const b2 = toFinite(inputs.b2);
+  const trPct = toFinite(inputs.trPct, 100);
+  const b = toFinite(inputs.b);
+  const m = toFinite(inputs.m);
+  const advanced = Boolean(inputs.advanced);
+  const E = toFinite(inputs.E);
+  const biasPts = toFinite(inputs.biasPts);
 
   const trPctClamped = clamp(trPct, 0, 100) / 100;
   const effectiveTRA = Math.max(0, a2) * trPctClamped;
