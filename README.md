@@ -1,4 +1,4 @@
-# Équilibre couple – calculateur
+# 💞 Équilibre couple – calculateur
 
 Équilibre couple est une application web qui aide deux partenaires à répartir équitablement leurs dépenses communes en tenant compte de leurs salaires nets et des avantages en tickets restaurant. Le calculateur permet d'estimer la contribution mensuelle de chacun, de visualiser le détail des calculs et de partager facilement le résultat avec l'autre personne.
 
