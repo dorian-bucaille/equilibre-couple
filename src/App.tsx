@@ -9,7 +9,7 @@ import { loadState, saveState } from "./lib/storage";
 import "./styles.css";
 
 const DEFAULTS: Inputs = {
-  a1: 2300,
+  a1: 2000,
   a2: 175,
   trPct: 100,
   b: 2000,

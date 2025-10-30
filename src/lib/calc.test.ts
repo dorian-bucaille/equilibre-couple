@@ -3,7 +3,7 @@ import { calculate } from "./calc";
 import type { Inputs } from "./types";
 
 const base: Inputs = {
-  a1: 2300,
+  a1: 2000,
   a2: 175,
   trPct: 100,
   b: 2000,
