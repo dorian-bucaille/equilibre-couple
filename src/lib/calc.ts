@@ -3,26 +3,47 @@ import type { Inputs, Result } from "./types";
 
 /**
  * Calcul "proportionnel aux revenus" avec TR comme contribution en nature.
- * - Mode simple: pot = m + V, cash = m, V = a2 * trPct
+ * - Mode simple: pot = m + V, cash = m, V = (a2 + b2) * trPct
  * - Mode avancé: pot = m + E, cash = m + max(0, E - V), V = min(effectiveTR, E)
- * - Part partenaire A ~ (a1 + V) / (a1 + V + b), puis biais +X points (clampé).
- * - Dépôt partenaire A = max(0, contribEqD - V), partenaire B = cash - dépôt A.
+ * - Part partenaire A ~ (a1 + V_A) / (a1 + V_A + b + V_B), puis biais +X points (clampé).
+ * - Dépôt partenaire A = max(0, contribEqD - V_A), partenaire B = cash - dépôt A.
  */
 export function calculate(inputs: Inputs): Result {
-  const { a1, a2, trPct, b, m, advanced, E, biasPts } = inputs;
+  const { a1, a2, b2, trPct, b, m, advanced, E, biasPts } = inputs;
 
-  const effectiveTR = Math.max(0, a2) * clamp(trPct, 0, 100) / 100;
+  const trPctClamped = clamp(trPct, 0, 100) / 100;
+  const effectiveTRA = Math.max(0, a2) * trPctClamped;
+  const effectiveTRB = Math.max(0, b2) * trPctClamped;
+  const effectiveTR = effectiveTRA + effectiveTRB;
 
-  const V = advanced ? Math.min(effectiveTR, Math.max(0, E)) : effectiveTR;
+  const eligibleTR = Math.max(0, E);
 
-  const potTotal = advanced ? m + Math.max(0, E) : m + V;
+  let usedTRA = effectiveTRA;
+  let usedTRB = effectiveTRB;
 
-  const extraEligibleCash = advanced ? Math.max(0, Math.max(0, E) - V) : 0;
+  if (advanced) {
+    const cap = Math.min(effectiveTR, eligibleTR);
+    if (effectiveTR > 0 && cap < effectiveTR) {
+      const ratio = cap / effectiveTR;
+      usedTRA = effectiveTRA * ratio;
+      usedTRB = effectiveTRB * ratio;
+    }
+    if (cap === 0) {
+      usedTRA = 0;
+      usedTRB = 0;
+    }
+  }
+
+  const V = advanced ? usedTRA + usedTRB : effectiveTR;
+
+  const potTotal = advanced ? m + eligibleTR : m + V;
+
+  const extraEligibleCash = advanced ? Math.max(0, eligibleTR - V) : 0;
 
   const cashNeeded = m + extraEligibleCash;
 
-  const wD = Math.max(0, a1) + V;
-  const wM = Math.max(0, b);
+  const wD = Math.max(0, a1) + usedTRA;
+  const wM = Math.max(0, b) + usedTRB;
   const denom = wD + wM;
   const shareD_raw = denom > 0 ? wD / denom : 0.5;
 
@@ -34,9 +55,35 @@ export function calculate(inputs: Inputs): Result {
   const contribEqD = potTotal * shareD_biased;
   const contribEqM = potTotal - contribEqD;
 
-  // Dépôts cash
-  let depositD = Math.max(0, contribEqD - V);
-  let depositM = cashNeeded - depositD;
+  const depositDRaw = contribEqD - usedTRA;
+  const depositMRaw = contribEqM - usedTRB;
+
+  // Dépôts cash (répartis après prise en compte des TR de chaque partenaire)
+  let depositD = depositDRaw;
+  let depositM = depositMRaw;
+
+  if (depositD < 0) {
+    depositM += depositD;
+    depositD = 0;
+  }
+  if (depositM < 0) {
+    depositD += depositM;
+    depositM = 0;
+  }
+
+  const cashNeededRounded = round2(cashNeeded);
+
+  depositD = round2(Math.max(0, depositD));
+  depositM = round2(Math.max(0, cashNeededRounded - depositD));
+
+  const sumDeposits = depositD + depositM;
+  if (sumDeposits > cashNeededRounded && Math.abs(sumDeposits - cashNeededRounded) < 0.05) {
+    const diff = round2(sumDeposits - cashNeededRounded);
+    if (diff > 0) {
+      if (depositM >= diff) depositM = round2(depositM - diff);
+      else depositD = round2(Math.max(0, depositD - diff));
+    }
+  }
 
   // Sécurité borne (arrondis)
   depositD = round2(depositD);
@@ -44,11 +91,11 @@ export function calculate(inputs: Inputs): Result {
   // Corrige l'éventuel -0.01 dû aux arrondis
   if (depositM < 0 && Math.abs(depositM) < 0.02) {
     depositM = 0;
-    depositD = round2(cashNeeded - depositM);
+    depositD = round2(cashNeededRounded - depositM);
   }
   if (depositD < 0 && Math.abs(depositD) < 0.02) {
     depositD = 0;
-    depositM = round2(cashNeeded);
+    depositM = round2(cashNeededRounded);
   }
 
   const warnings: string[] = [];
@@ -57,25 +104,35 @@ export function calculate(inputs: Inputs): Result {
   if (denom === 0) {
     warnings.push("Somme des revenus pondérés nulle — parts fixées à 50/50 par sécurité.");
   }
-  if (advanced && effectiveTR > E) {
+  if (advanced && effectiveTR > eligibleTR) {
     warnings.push(
-      `TR non utilisés intégralement: ${round2(effectiveTR - E)} € non consommés (E < TR).`
+      `TR non utilisés intégralement: ${round2(effectiveTR - eligibleTR)} € non consommés (E < TR).`
     );
   }
-  if (contribEqD - V < 0) {
+  if (contribEqD - usedTRA < 0) {
     warnings.push("Dépôt du partenaire A borné à 0 (sa part est couverte par les tickets resto).");
+  }
+  if (contribEqM - usedTRB < 0) {
+    warnings.push("Dépôt du partenaire B borné à 0 (sa part est couverte par les tickets resto).");
   }
 
   steps.push(
-    `TR effectifs: ${round2(effectiveTR)} €, V utilisés: ${round2(V)} €`,
+    `TR effectifs — A: ${round2(effectiveTRA)} €, B: ${round2(effectiveTRB)} € (total ${round2(
+      effectiveTR
+    )} €)`,
     advanced
-      ? `Pot total M = m + E = ${round2(m)} + ${round2(E)} = ${round2(potTotal)} €`
+      ? `TR utilisés (après plafond E) — A: ${round2(usedTRA)} €, B: ${round2(usedTRB)} € (total ${round2(
+          V
+        )} €)`
+      : `TR utilisés — A: ${round2(effectiveTRA)} €, B: ${round2(effectiveTRB)} € (total ${round2(V)} €)`,
+    advanced
+      ? `Pot total M = m + E = ${round2(m)} + ${round2(eligibleTR)} = ${round2(potTotal)} €`
       : `Pot total équivalent = m + V = ${round2(m)} + ${round2(V)} = ${round2(potTotal)} €`,
     advanced
       ? `Cash à déposer = m + max(0, E - V) = ${round2(m)} + ${round2(
-          Math.max(0, E - V)
-        )} = ${round2(cashNeeded)} €`
-      : `Cash à déposer = m = ${round2(cashNeeded)} €`,
+          Math.max(0, eligibleTR - V)
+        )} = ${round2(cashNeededRounded)} €`
+      : `Cash à déposer = m = ${round2(cashNeededRounded)} €`,
     `Parts (avant biais): D=${(shareD_raw * 100).toFixed(1)}% / M=${(
       (1 - shareD_raw) * 100
     ).toFixed(1)}%`,
@@ -89,10 +146,14 @@ export function calculate(inputs: Inputs): Result {
   );
 
   return {
+    effectiveTRA: round2(effectiveTRA),
+    effectiveTRB: round2(effectiveTRB),
     effectiveTR: round2(effectiveTR),
+    usedTRA: round2(usedTRA),
+    usedTRB: round2(usedTRB),
     V: round2(V),
     potTotal: round2(potTotal),
-    cashNeeded: round2(cashNeeded),
+    cashNeeded: cashNeededRounded,
     shareD_raw: round2(shareD_raw),
     shareD_biased: round2(shareD_biased),
     shareM_biased: round2(shareM_biased),

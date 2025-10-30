@@ -11,6 +11,7 @@ import "./styles.css";
 const DEFAULTS: Inputs = {
   a1: 2300,
   a2: 175,
+  b2: 0,
   trPct: 100,
   b: 2000,
   m: 1500,
@@ -26,6 +27,7 @@ function parseQuery(defaults: Inputs): Inputs {
   return {
     a1: num(g("a1"), defaults.a1),
     a2: num(g("a2"), defaults.a2),
+    b2: num(g("b2"), defaults.b2),
     trPct: num(g("trPct"), defaults.trPct),
     b: num(g("b"), defaults.b),
     m: num(g("m"), defaults.m),
@@ -39,6 +41,7 @@ function toQuery(i: Inputs) {
   const p = new URLSearchParams();
   p.set("a1", String(i.a1));
   p.set("a2", String(i.a2));
+  p.set("b2", String(i.b2));
   p.set("trPct", String(i.trPct));
   p.set("b", String(i.b));
   p.set("m", String(i.m));
@@ -112,6 +115,14 @@ export default function App() {
             onChange={(v) => setInputs({ ...inputs, a2: v })}
             suffix="€ / mois"
             tooltip="Montant mensuel brut de tickets restaurant crédités"
+          />
+          <InputField
+            id="b2"
+            label={`Tickets resto Partenaire B${inputs.advanced ? " (b2)" : ""}`}
+            value={inputs.b2}
+            onChange={(v) => setInputs({ ...inputs, b2: v })}
+            suffix="€ / mois"
+            tooltip="Montant mensuel brut de tickets restaurant crédités pour le partenaire B"
           />
           {inputs.advanced && (
             <InputField
