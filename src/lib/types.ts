@@ -6,7 +6,7 @@ export type Inputs = {
   m: number;       // Budget commun hors TR (cash non-eligible)
   advanced: boolean;
   E: number;       // Dépenses éligibles TR (si advanced), sinon ignoré
-  biasPts: number; // +points en faveur du partenaire B => A paie plus
+  biasPts: number; // Biais signé en points (-50..+50). Positif: favorise B (A paie plus). Négatif: favorise A (A paie moins)
 };
 
 export type Result = {

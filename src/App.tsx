@@ -162,20 +162,31 @@ export default function App() {
           {inputs.advanced && (
             <label className="flex flex-col gap-1 sm:col-span-2">
               <div className="flex items-center justify-between">
-                <span className="font-medium">Ajustement en faveur du partenaire B</span>
-                <span className="text-sm text-gray-500">+{inputs.biasPts.toFixed(1)} points pour le partenaire A</span>
+                <span className="font-medium">Ajustement du prorata (favoriser A ou B)</span>
+                <span className="text-sm text-gray-500">
+                  {inputs.biasPts === 0
+                    ? "Neutre"
+                    : inputs.biasPts > 0
+                    ? `Favorise B (+${inputs.biasPts.toFixed(1)} pts)`
+                    : `Favorise A (${inputs.biasPts.toFixed(1)} pts)`}
+                </span>
               </div>
               <input
                 type="range"
-                min={0}
+                min={-10}
                 max={10}
                 step={0.5}
                 value={inputs.biasPts}
                 onChange={(e) => setInputs({ ...inputs, biasPts: parseFloat(e.target.value) })}
-                aria-label="Ajustement en faveur du partenaire B"
+                aria-label="Ajustement du prorata (A ↔ B)"
               />
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Favoriser A</span>
+                <span>Neutre</span>
+                <span>Favoriser B</span>
+              </div>
               <span className="text-xs text-gray-500">
-                Plus la valeur est élevée, plus le partenaire A prend de poids dans le prorata ({'=>'} il paie davantage en cash).
+                Valeur positive: favorise B (A paie davantage). Valeur négative: favorise A (A paie moins).
               </span>
             </label>
           )}
