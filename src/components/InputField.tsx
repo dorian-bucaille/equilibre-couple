@@ -20,7 +20,7 @@ export const InputField: React.FC<Props> = ({
     <label htmlFor={id} className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
         <span className="font-medium">{label}</span>
-        {tooltip ? <InfoIcon title={tooltip} /> : null}
+        {tooltip ? <InfoIcon title={tooltip} tooltipId={`${id}-tip`} /> : null}
       </div>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <input
