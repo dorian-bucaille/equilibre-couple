@@ -26,7 +26,7 @@ describe("calculate", () => {
     expect(r.cashNeeded).toBeCloseTo(1500 + (600 - 175), 2);
   });
 
-  it("bias pushes Dorian up", () => {
+  it("bias increases partner A's share", () => {
     const r0 = calculate(base);
     const r1 = calculate({ ...base, biasPts: 5 });
     expect(r1.depositD).toBeGreaterThanOrEqual(r0.depositD);

@@ -8,19 +8,19 @@ export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
       <h2 className="text-lg font-semibold mb-2">Résumé</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div>
-          <div className="text-sm text-gray-500">Part Dorian</div>
+          <div className="text-sm text-gray-500">Part partenaire A</div>
           <div className="text-xl">{pct(r.shareD_biased)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-500">Part Mariwenn</div>
+          <div className="text-sm text-gray-500">Part partenaire B</div>
           <div className="text-xl">{pct(r.shareM_biased)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-500">Dépôt Dorian</div>
+          <div className="text-sm text-gray-500">Dépôt partenaire A</div>
           <div className="text-xl">{euro(r.depositD)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-500">Dépôt Mariwenn</div>
+          <div className="text-sm text-gray-500">Dépôt partenaire B</div>
           <div className="text-xl">{euro(r.depositM)}</div>
         </div>
       </div>
@@ -48,4 +48,3 @@ export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
     </div>
   );
 };
-

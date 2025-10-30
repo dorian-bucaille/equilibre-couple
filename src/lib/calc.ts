@@ -5,8 +5,8 @@ import type { Inputs, Result } from "./types";
  * Calcul "proportionnel aux revenus" avec TR comme contribution en nature.
  * - Mode simple: pot = m + V, cash = m, V = a2 * trPct
  * - Mode avancé: pot = m + E, cash = m + max(0, E - V), V = min(effectiveTR, E)
- * - Part Dorian ~ (a1 + V) / (a1 + V + b), puis biais +X points (clampé).
- * - Dépôt Dorian = max(0, contribEqD - V), Mariwenn = cash - dépôt D.
+ * - Part partenaire A ~ (a1 + V) / (a1 + V + b), puis biais +X points (clampé).
+ * - Dépôt partenaire A = max(0, contribEqD - V), partenaire B = cash - dépôt A.
  */
 export function calculate(inputs: Inputs): Result {
   const { a1, a2, trPct, b, m, advanced, E, biasPts } = inputs;
@@ -26,8 +26,8 @@ export function calculate(inputs: Inputs): Result {
   const denom = wD + wM;
   const shareD_raw = denom > 0 ? wD / denom : 0.5;
 
-  // Biais en faveur de Mariwenn: on AUGMENTE la part de Dorian de X points => Dorian paie plus, Mariwenn moins.
-  // (C'est ce que tu as validé: "ajuster légèrement en faveur de Mariwenn (ex. +3 pts pour toi)")
+  // Biais en faveur du partenaire B: on AUGMENTE la part du partenaire A de X points => A paie plus, B moins.
+  // (Ex.: "ajuster légèrement en faveur du partenaire B" — p.ex. +3 pts pour A)
   const shareD_biased = clamp(shareD_raw + clamp(biasPts, 0, 50) / 100, 0, 1);
   const shareM_biased = 1 - shareD_biased;
 
@@ -63,7 +63,7 @@ export function calculate(inputs: Inputs): Result {
     );
   }
   if (contribEqD - V < 0) {
-    warnings.push("Dépôt Dorian borné à 0 (sa part est couverte par les tickets resto).");
+    warnings.push("Dépôt du partenaire A borné à 0 (sa part est couverte par les tickets resto).");
   }
 
   steps.push(

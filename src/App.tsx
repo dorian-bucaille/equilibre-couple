@@ -89,23 +89,23 @@ export default function App() {
         <div className="grid sm:grid-cols-2 gap-3">
           <InputField
             id="a1"
-            label="Salaire Dorian (a1)"
+            label="Salaire Partenaire A (a1)"
             value={inputs.a1}
             onChange={(v) => setInputs({ ...inputs, a1: v })}
             suffix="€ / mois"
-            tooltip="Salaire net mensuel de Dorian"
+            tooltip="Salaire net mensuel du partenaire A"
           />
           <InputField
             id="b"
-            label="Salaire Mariwenn (b)"
+            label="Salaire Partenaire B (b)"
             value={inputs.b}
             onChange={(v) => setInputs({ ...inputs, b: v })}
             suffix="€ / mois"
-            tooltip="Salaire net mensuel de Mariwenn"
+            tooltip="Salaire net mensuel du partenaire B"
           />
           <InputField
             id="a2"
-            label="Tickets resto Dorian (a2)"
+            label="Tickets resto Partenaire A (a2)"
             value={inputs.a2}
             onChange={(v) => setInputs({ ...inputs, a2: v })}
             suffix="€ / mois"
@@ -160,8 +160,8 @@ export default function App() {
 
           <label className="flex flex-col gap-1 sm:col-span-2">
             <div className="flex items-center justify-between">
-              <span className="font-medium">Ajustement en faveur de Mariwenn</span>
-              <span className="text-sm text-gray-500">+{inputs.biasPts.toFixed(1)} points pour Dorian</span>
+              <span className="font-medium">Ajustement en faveur du partenaire B</span>
+              <span className="text-sm text-gray-500">+{inputs.biasPts.toFixed(1)} points pour le partenaire A</span>
             </div>
             <input
               type="range"
@@ -170,10 +170,10 @@ export default function App() {
               step={0.5}
               value={inputs.biasPts}
               onChange={(e) => setInputs({ ...inputs, biasPts: parseFloat(e.target.value) })}
-              aria-label="Ajustement en faveur de Mariwenn"
+              aria-label="Ajustement en faveur du partenaire B"
             />
             <span className="text-xs text-gray-500">
-              Plus la valeur est élevée, plus Dorian prend de poids dans le prorata ({'=>'} il paie davantage en cash).
+              Plus la valeur est élevée, plus le partenaire A prend de poids dans le prorata ({'=>'} il paie davantage en cash).
             </span>
           </label>
         </div>
@@ -221,4 +221,3 @@ function ThemeToggle() {
     </button>
   );
 }
-
