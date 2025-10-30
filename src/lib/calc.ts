@@ -125,25 +125,21 @@ export function calculate(inputs: Inputs): Result {
   }
 
   steps.push(
-    `TR effectifs — A: ${r2(effectiveTRA)} €, B: ${r2(effectiveTRB)} € (total ${r2(effectiveTR)} €)`,
-    advanced
-      ? `TR utilisés (après plafond E) — A: ${r2(usedTRA)} €, B: ${r2(usedTRB)} € (total ${r2(V)} €)`
-      : `TR utilisés — A: ${r2(effectiveTRA)} €, B: ${r2(effectiveTRB)} € (total ${r2(V)} €)`,
-    advanced
-      ? `Pot total M = m + E = ${r2(m)} + ${r2(eligibleTR)} = ${r2(potTotal)} €`
-      : `Pot total équivalent = m + V = ${r2(m)} + ${r2(V)} = ${r2(potTotal)} €`,
-    advanced
-      ? `Cash à déposer = m + max(0, E - V) = ${r2(m)} + ${r2(Math.max(0, eligibleTR - V))} = ${r2(
-          cashNeededRounded
-        )} €`
-      : `Cash à déposer = m = ${r2(cashNeededRounded)} €`,
-    `Parts (avant biais): D=${(shareD_raw * 100).toFixed(1)}% / M=${((1 - shareD_raw) * 100).toFixed(1)}%`,
-    `Biais ${(biasPts >= 0 ? "+" : "") + r2(biasPts).toFixed(1)} pts (${
-      biasPts === 0 ? "neutre" : biasPts > 0 ? "favorise B" : "favorise A"
-    }) => D=${(shareD_biased * 100).toFixed(1)}% / M=${(shareM_biased * 100).toFixed(1)}%`,
-    `Contribution équivalente: D=${r2(contribEqD)} €, M=${r2(contribEqM)} €`,
-    `Dépôts cash: D=${r2(depositD)} €, M=${r2(depositM)} € (somme cash=${r2(depositD + depositM)} €)`
-  );
+  `TR effectifs — A: ${r2(effectiveTRA)} €, B: ${r2(effectiveTRB)} € (total ${r2(effectiveTR)} €)`,
+  advanced
+    ? `TR utilisés (après plafond E) — A: ${r2(usedTRA)} €, B: ${r2(usedTRB)} € (total ${r2(V)} €)`
+    : `TR utilisés — A: ${r2(effectiveTRA)} €, B: ${r2(effectiveTRB)} € (total ${r2(V)} €)`,
+  advanced
+    ? `Pot total M = m + E = ${r2(m)} + ${r2(eligibleTR)} = ${r2(potTotal)} €`
+    : `Pot total équivalent = m + V = ${r2(m)} + ${r2(V)} = ${r2(potTotal)} €`,
+  advanced
+    ? `Cash à déposer = m + max(0, E - V) = ${r2(m)} + ${r2(Math.max(0, eligibleTR - V))} = ${r2(cashNeededRounded)} €`
+    : `Cash à déposer = m = ${r2(cashNeededRounded)} €`,
+  `Parts (avant biais): D=${(shareD_raw * 100).toFixed(1)}% / M=${((1 - shareD_raw) * 100).toFixed(1)}%`,
+  `Biais ${(biasPts >= 0 ? "+" : "") + biasPts.toFixed(1)} pts (${biasPts === 0 ? "neutre" : biasPts > 0 ? "favorise B" : "favorise A"}) => D=${(shareD_biased * 100).toFixed(1)}% / M=${(shareM_biased * 100).toFixed(1)}%`,
+  `Contribution équivalente: D=${r2(contribEqD)} €, M=${r2(contribEqM)} €`,
+  `Dépôts cash: D=${r2(depositD)} €, M=${r2(depositM)} € (somme cash=${r2(depositD + depositM)} €)`
+);
 
   return {
     effectiveTRA: r2(effectiveTRA),
