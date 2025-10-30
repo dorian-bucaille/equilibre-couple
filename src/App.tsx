@@ -91,7 +91,7 @@ export default function App() {
         <div className="grid sm:grid-cols-2 gap-3">
           <InputField
             id="a1"
-            label="Salaire Partenaire A (a1)"
+            label={`Salaire Partenaire A${inputs.advanced ? " (a1)" : ""}`}
             value={inputs.a1}
             onChange={(v) => setInputs({ ...inputs, a1: v })}
             suffix="€ / mois"
@@ -99,7 +99,7 @@ export default function App() {
           />
           <InputField
             id="b"
-            label="Salaire Partenaire B (b)"
+            label={`Salaire Partenaire B${inputs.advanced ? " (b)" : ""}`}
             value={inputs.b}
             onChange={(v) => setInputs({ ...inputs, b: v })}
             suffix="€ / mois"
@@ -107,7 +107,7 @@ export default function App() {
           />
           <InputField
             id="a2"
-            label="Tickets resto Partenaire A (a2)"
+            label={`Tickets resto Partenaire A${inputs.advanced ? " (a2)" : ""}`}
             value={inputs.a2}
             onChange={(v) => setInputs({ ...inputs, a2: v })}
             suffix="€ / mois"
@@ -129,7 +129,7 @@ export default function App() {
 
           <InputField
             id="m"
-            label="Budget commun hors TR (m)"
+            label={`Budget commun hors TR${inputs.advanced ? " (m)" : ""}`}
             value={inputs.m}
             onChange={(v) => setInputs({ ...inputs, m: v })}
             suffix="€ / mois"
@@ -137,7 +137,7 @@ export default function App() {
           />
 
           <label className="flex flex-col gap-1">
-            <span className="font-medium">Mode avancé (E/N)</span>
+            <span className="font-medium">Mode avancé</span>
             <div className="flex flex-wrap items-center gap-2">
               <input
                 type="checkbox"
