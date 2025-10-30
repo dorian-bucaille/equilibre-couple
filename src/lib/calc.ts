@@ -60,7 +60,8 @@ export function calculate(inputs: Inputs): Result {
 
   // Biais en faveur du partenaire B: on AUGMENTE la part du partenaire A de X points => A paie plus, B moins.
   // (Ex.: "ajuster légèrement en faveur du partenaire B" — p.ex. +3 pts pour A)
-  const shareD_biased = clamp(shareD_raw + clamp(biasPts, 0, 50) / 100, 0, 1);
+  const biasShift = clamp(biasPts, -50, 50) / 100;
+  const shareD_biased = clamp(shareD_raw + biasShift, 0, 1);
   const shareM_biased = 1 - shareD_biased;
 
   const contribEqD = potTotal * shareD_biased;
@@ -147,9 +148,13 @@ export function calculate(inputs: Inputs): Result {
     `Parts (avant biais): D=${(shareD_raw * 100).toFixed(1)}% / M=${(
       (1 - shareD_raw) * 100
     ).toFixed(1)}%`,
-    `Biais +${biasPts.toFixed(1)} pts => D=${(shareD_biased * 100).toFixed(
-      1
-    )}% / M=${(shareM_biased * 100).toFixed(1)}%`,
+    `Biais ${(biasPts >= 0 ? "+" : "") + biasPts.toFixed(1)} pts (${biasPts === 0
+      ? "neutre"
+      : biasPts > 0
+        ? "favorise B"
+        : "favorise A"}) => D=${(shareD_biased * 100).toFixed(1)}% / M=${(
+      shareM_biased * 100
+    ).toFixed(1)}%`,
     `Contribution équivalente: D=${round2(contribEqD)} €, M=${round2(contribEqM)} €`,
     `Dépôts cash: D=${round2(depositD)} €, M=${round2(depositM)} € (somme cash=${round2(
       depositD + depositM
