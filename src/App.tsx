@@ -14,7 +14,7 @@ const DEFAULTS: Inputs = {
   trPct: 100,
   b: 2000,
   m: 1500,
-  advanced: true, // tu as validé le mode avancé
+  advanced: false,
   E: 600,
   biasPts: 0,
 };
@@ -111,17 +111,19 @@ export default function App() {
             suffix="€ / mois"
             tooltip="Montant mensuel brut de tickets restaurant crédités"
           />
-          <InputField
-            id="trPct"
-            label="% TR effectivement dépensés"
-            value={inputs.trPct}
-            onChange={(v) => setInputs({ ...inputs, trPct: v })}
-            suffix="%"
-            min={0}
-            max={100}
-            step={1}
-            tooltip="Pourcentage des TR réellement consommés"
-          />
+          {inputs.advanced && (
+            <InputField
+              id="trPct"
+              label="% TR effectivement dépensés"
+              value={inputs.trPct}
+              onChange={(v) => setInputs({ ...inputs, trPct: v })}
+              suffix="%"
+              min={0}
+              max={100}
+              step={1}
+              tooltip="Pourcentage des TR réellement consommés"
+            />
+          )}
 
           <InputField
             id="m"
@@ -157,25 +159,26 @@ export default function App() {
               tooltip="Montant mensuel des dépenses éligibles (courses/resto) qui peuvent être payées en TR"
             />
           )}
-
-          <label className="flex flex-col gap-1 sm:col-span-2">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Ajustement en faveur du partenaire B</span>
-              <span className="text-sm text-gray-500">+{inputs.biasPts.toFixed(1)} points pour le partenaire A</span>
-            </div>
-            <input
-              type="range"
-              min={0}
-              max={10}
-              step={0.5}
-              value={inputs.biasPts}
-              onChange={(e) => setInputs({ ...inputs, biasPts: parseFloat(e.target.value) })}
-              aria-label="Ajustement en faveur du partenaire B"
-            />
-            <span className="text-xs text-gray-500">
-              Plus la valeur est élevée, plus le partenaire A prend de poids dans le prorata ({'=>'} il paie davantage en cash).
-            </span>
-          </label>
+          {inputs.advanced && (
+            <label className="flex flex-col gap-1 sm:col-span-2">
+              <div className="flex items-center justify-between">
+                <span className="font-medium">Ajustement en faveur du partenaire B</span>
+                <span className="text-sm text-gray-500">+{inputs.biasPts.toFixed(1)} points pour le partenaire A</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={10}
+                step={0.5}
+                value={inputs.biasPts}
+                onChange={(e) => setInputs({ ...inputs, biasPts: parseFloat(e.target.value) })}
+                aria-label="Ajustement en faveur du partenaire B"
+              />
+              <span className="text-xs text-gray-500">
+                Plus la valeur est élevée, plus le partenaire A prend de poids dans le prorata ({'=>'} il paie davantage en cash).
+              </span>
+            </label>
+          )}
         </div>
       </section>
 
