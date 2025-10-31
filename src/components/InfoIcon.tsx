@@ -54,7 +54,9 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId, disabled =
     setOpen(false);
   }, []);
 
-  const handlePointerEnter = (event: React.PointerEvent<ButtonElement>) => {
+  const handleContainerPointerEnter = (
+    event: React.PointerEvent<SpanElement>,
+  ) => {
     if (disabled) {
       return;
     }
@@ -63,7 +65,9 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId, disabled =
     }
   };
 
-  const handlePointerLeave = (event: React.PointerEvent<ButtonElement>) => {
+  const handleContainerPointerLeave = (
+    event: React.PointerEvent<SpanElement>,
+  ) => {
     if (disabled) {
       return;
     }
@@ -95,7 +99,12 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId, disabled =
   };
 
   return (
-    <span ref={containerRef} className="relative inline-flex">
+    <span
+      ref={containerRef}
+      className="relative inline-flex"
+      onPointerEnter={handleContainerPointerEnter}
+      onPointerLeave={handleContainerPointerLeave}
+    >
       <button
         type="button"
         className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-600/20 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-blue-300"
@@ -105,8 +114,6 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId, disabled =
         aria-expanded={disabled ? false : open}
         aria-hidden={disabled || undefined}
         disabled={disabled}
-        onPointerEnter={handlePointerEnter}
-        onPointerLeave={handlePointerLeave}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
         onClick={handleClick}
