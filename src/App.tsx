@@ -5,6 +5,7 @@ import type { Inputs } from "./lib/types";
 import { InputField } from "./components/InputField";
 import { SummaryCard } from "./components/SummaryCard";
 import { DetailsCard } from "./components/DetailsCard";
+import { GlossaryButton } from "./components/GlossaryButton";
 import { loadState, saveState } from "./lib/storage";
 import "./styles.css";
 
@@ -82,6 +83,7 @@ export default function App() {
         </h1>
         <div className="no-print flex flex-wrap items-center justify-center gap-2 md:justify-end">
           <ThemeToggle />
+          <GlossaryButton />
           <button onClick={copyLink} className="btn btn-ghost">Copier le lien</button>
           <button onClick={printPDF} className="btn btn-ghost">Imprimer / PDF</button>
           <button onClick={reset} className="btn btn-danger">Réinitialiser</button>
