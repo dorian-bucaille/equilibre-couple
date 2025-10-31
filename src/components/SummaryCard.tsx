@@ -1,6 +1,6 @@
 import React from "react";
 import { euro, pct } from "../lib/format";
-import type { Result } from "../lib/types";
+import type { Result, SplitMode } from "../lib/types";
 
 type Segment = {
   label: string;
@@ -95,10 +95,13 @@ export const SummaryCard: React.FC<{
   r: Result;
   partnerAName: string;
   partnerBName: string;
+  mode: SplitMode;
   onSaveHistory?: () => void;
   onFocusNote?: () => void;
-}> = ({ r, partnerAName, partnerBName, onSaveHistory, onFocusNote }) => {
+}> = ({ r, partnerAName, partnerBName, mode, onSaveHistory, onFocusNote }) => {
   const [displayMode, setDisplayMode] = React.useState<DisplayMode>("percent");
+  const isEqualLeftover = mode === "equal_leftover";
+  const modeAnnouncement = isEqualLeftover ? "Mode reste à vivre égal" : "Mode proportionnel";
 
   const contributionSegments: Segment[] = [
     {
@@ -126,6 +129,9 @@ export const SummaryCard: React.FC<{
   return (
     <div className="card">
       <h2 className="text-lg font-semibold mb-2">Résumé</h2>
+      <div aria-live="polite" className="sr-only">
+        {modeAnnouncement}
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div>
           <div className="text-sm text-gray-500">Part {partnerAName}</div>
@@ -143,6 +149,18 @@ export const SummaryCard: React.FC<{
           <div className="text-sm text-gray-500">Dépôt {partnerBName}</div>
           <div className="text-xl">{euro(r.depositM)}</div>
         </div>
+        {isEqualLeftover && (
+          <>
+            <div>
+              <div className="text-sm text-gray-500">Reste {partnerAName}</div>
+              <div className="text-xl">{euro(r.leftoverA)}</div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500">Reste {partnerBName}</div>
+              <div className="text-xl">{euro(r.leftoverB)}</div>
+            </div>
+          </>
+        )}
       </div>
 
       <hr className="my-3 border-gray-200 dark:border-gray-800" />

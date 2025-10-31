@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { calculate } from "./lib/calc";
-import type { Inputs } from "./lib/types";
+import type { Inputs, SplitMode } from "./lib/types";
 import { InputField } from "./components/InputField";
 import { SummaryCard } from "./components/SummaryCard";
 import { DetailsCard } from "./components/DetailsCard";
 import { GlossaryButton } from "./components/GlossaryButton";
+import { InfoIcon } from "./components/InfoIcon";
 import { History, type HistoryHandle } from "./components/History";
 import { loadState, saveState, type HistoryItem } from "./lib/storage";
 import { useCollapse } from "./hooks/useCollapse";
@@ -23,12 +24,15 @@ const DEFAULTS: Inputs = {
   advanced: false,
   E: 600,
   biasPts: 0,
+  mode: "proportional",
 };
 
 function parseQuery(defaults: Inputs): Inputs {
   const u = new URL(window.location.href);
   const g = (k: keyof Inputs) => u.searchParams.get(String(k));
   const num = (v: string | null, d: number) => (v ? Number(v) : d);
+  const modeParam = u.searchParams.get("mode");
+  const mode: SplitMode = modeParam === "equal_leftover" ? "equal_leftover" : modeParam === "proportional" ? "proportional" : defaults.mode;
   return {
     partnerAName: (u.searchParams.get("nameA") ?? defaults.partnerAName) || "",
     partnerBName: (u.searchParams.get("nameB") ?? defaults.partnerBName) || "",
@@ -41,6 +45,7 @@ function parseQuery(defaults: Inputs): Inputs {
     advanced: g("advanced") ? g("advanced") === "1" : defaults.advanced,
     E: num(g("E"), defaults.E),
     biasPts: num(g("biasPts"), defaults.biasPts),
+    mode,
   };
 }
 
@@ -57,6 +62,7 @@ function toQuery(i: Inputs) {
   p.set("advanced", i.advanced ? "1" : "0");
   p.set("E", String(i.E));
   p.set("biasPts", String(i.biasPts));
+  p.set("mode", i.mode);
   return `${location.origin}${location.pathname}?${p.toString()}`;
 }
 
@@ -76,6 +82,7 @@ export default function App() {
 
   const partnerAName = inputs.partnerAName.trim() || "Partenaire A";
   const partnerBName = inputs.partnerBName.trim() || "Partenaire B";
+  const biasDisabled = inputs.mode === "equal_leftover";
 
   useEffect(() => {
     saveState(inputs);
@@ -96,6 +103,11 @@ export default function App() {
   };
 
   const printPDF = () => window.print();
+
+  const handleModeChange = (mode: SplitMode) => {
+    setInputs((prev) => ({ ...prev, mode }));
+    setAriaMessage(mode === "equal_leftover" ? "Mode reste à vivre égal activé" : "Mode proportionnel activé");
+  };
 
   const handleSummarySave = () => {
     historyRef.current?.addCurrentState();
@@ -181,6 +193,37 @@ export default function App() {
             placeholder="Partenaire B"
             tooltip="Personnalise le nom utilisé pour le partenaire B dans les calculs et graphiques"
           />
+          <fieldset className="sm:col-span-2" aria-describedby="mode-tip">
+            <legend className="flex items-center gap-2 font-medium">
+              <span>Mode de répartition</span>
+              <InfoIcon
+                title="Proportionnel : chacun contribue selon ses moyens. Reste à vivre égal : chacun garde le même reste cash après contribution."
+                tooltipId="mode-tip"
+              />
+            </legend>
+            <div className="mt-2 flex gap-4">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="mode"
+                  value="proportional"
+                  checked={inputs.mode === "proportional"}
+                  onChange={() => handleModeChange("proportional")}
+                />
+                <span>Proportionnel</span>
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="mode"
+                  value="equal_leftover"
+                  checked={inputs.mode === "equal_leftover"}
+                  onChange={() => handleModeChange("equal_leftover")}
+                />
+                <span>Reste à vivre égal</span>
+              </label>
+            </div>
+          </fieldset>
           <InputField
             id="a1"
             label={`Salaire ${partnerAName}${inputs.advanced ? " (a1)" : ""}`}
@@ -305,6 +348,7 @@ export default function App() {
                       className={`w-full accent-blue-600 transition-transform duration-200 ease-out ${
                         biasHighlight ? "scale-[1.02]" : "scale-100"
                       }`}
+                      disabled={biasDisabled}
                     />
                     <div className="flex justify-between text-xs text-gray-500">
                       <span>Favoriser {partnerAName}</span>
@@ -314,6 +358,11 @@ export default function App() {
                     <span className="text-xs text-gray-500">
                       Valeur positive: favorise {partnerBName} ({partnerAName} paie davantage). Valeur négative: favorise {partnerAName} ({partnerAName} paie moins).
                     </span>
+                    {biasDisabled && (
+                      <span className="field-help text-amber-600">
+                        Biais non applicable en mode “Reste à vivre égal”.
+                      </span>
+                    )}
                   </label>
                 </div>
               </div>
@@ -326,6 +375,7 @@ export default function App() {
         r={result}
         partnerAName={partnerAName}
         partnerBName={partnerBName}
+        mode={inputs.mode}
         onSaveHistory={handleSummarySave}
         onFocusNote={handleSummaryFocusNote}
       />
@@ -365,6 +415,7 @@ function areInputsEqual(a: Inputs, b: Inputs) {
     "advanced",
     "E",
     "biasPts",
+    "mode",
   ];
 
   return keys.every((key) => a[key] === b[key]);

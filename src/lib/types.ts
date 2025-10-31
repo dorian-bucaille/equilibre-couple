@@ -1,3 +1,5 @@
+export type SplitMode = "proportional" | "equal_leftover";
+
 export type Inputs = {
   partnerAName: string; // Nom affiché pour le partenaire A
   partnerBName: string; // Nom affiché pour le partenaire B
@@ -10,6 +12,7 @@ export type Inputs = {
   advanced: boolean;
   E: number;            // Dépenses éligibles TR (si advanced), sinon ignoré
   biasPts: number;      // Biais signé en points (-50..+50). Positif: favorise B (A paie plus). Négatif: favorise A (A paie moins)
+  mode: SplitMode;      // Mode de calcul des dépôts
 };
 
 export type Result = {
@@ -28,6 +31,8 @@ export type Result = {
   contribEqM: number;
   depositD: number;     // Dépôt cash du partenaire A (borné >= 0)
   depositM: number;     // Dépôt cash du partenaire B
+  leftoverA: number;    // Reste à vivre (cash) partenaire A
+  leftoverB: number;    // Reste à vivre (cash) partenaire B
   warnings: string[];
   steps: string[];
 };
