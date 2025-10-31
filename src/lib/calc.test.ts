@@ -78,4 +78,47 @@ describe("calculate", () => {
     expect(r.depositM).toBeCloseTo(r.cashNeeded, 2);
     expect(r.leftoverA).toBeGreaterThanOrEqual(0);
   });
+
+  it("proportional mode falls back to 50/50 when weights vanish", () => {
+    const inp: Inputs = {
+      ...base,
+      a1: 0,
+      a2: 0,
+      b: 0,
+      b2: 0,
+      m: 120,
+      trPct: 0,
+    };
+    const r = calculate(inp);
+    expect(r.depositD).toBeCloseTo(60, 2);
+    expect(r.depositM).toBeCloseTo(60, 2);
+    expect(r.shareD_biased).toBeCloseTo(0.5, 2);
+    expect(r.warnings).toContain(
+      "Somme des revenus pondérés nulle — parts fixées à 50/50 par sécurité."
+    );
+  });
+
+  it("advanced mode warns when TR exceed eligible expenses", () => {
+    const inp: Inputs = {
+      ...base,
+      advanced: true,
+      a2: 500,
+      b2: 300,
+      trPct: 100,
+      E: 400,
+      m: 200,
+    };
+    const r = calculate(inp);
+    expect(r.usedTRA + r.usedTRB).toBeCloseTo(inp.E, 2);
+    expect(r.warnings).toContain(
+      "TR non utilisés intégralement: 400 € non consommés (E < TR)."
+    );
+  });
+
+  it("bias in proportional mode reduces partner A share when negative", () => {
+    const r0 = calculate(base);
+    const rBias = calculate({ ...base, biasPts: -10 });
+    expect(rBias.shareD_biased).toBeLessThan(r0.shareD_biased);
+    expect(rBias.shareM_biased).toBeGreaterThan(r0.shareM_biased);
+  });
 });
