@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import { calculate } from "./lib/calc";
 import type { Inputs, SplitMode } from "./lib/types";
 import { InputField } from "./components/InputField";
@@ -14,8 +16,8 @@ import "./styles.css";
 import { TextField } from "./components/TextField";
 
 const DEFAULTS: Inputs = {
-  partnerAName: "Partenaire A",
-  partnerBName: "Partenaire B",
+  partnerAName: "",
+  partnerBName: "",
   a1: 2000,
   a2: 175,
   b2: 0,
@@ -73,6 +75,10 @@ function toQuery(i: Inputs) {
 }
 
 export default function App() {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith("fr") ? "fr-FR" : "en-GB";
+  const partnerPlaceholderA = t("parameters.partnerPlaceholder", { label: "A" });
+  const partnerPlaceholderB = t("parameters.partnerPlaceholder", { label: "B" });
   const [inputs, setInputs] = useState<Inputs>(() => {
     const loaded = loadState(DEFAULTS);
     const merged = parseQuery(loaded);
@@ -90,10 +96,28 @@ export default function App() {
     [inputs, lastLoadedInputs],
   );
 
-  const partnerAName = inputs.partnerAName.trim() || "Partenaire A";
-  const partnerBName = inputs.partnerBName.trim() || "Partenaire B";
+  const partnerAName = inputs.partnerAName.trim() || partnerPlaceholderA;
+  const partnerBName = inputs.partnerBName.trim() || partnerPlaceholderB;
   const biasDisabled = inputs.mode === "equal_leftover";
   const advancedCollapsed = !inputs.advanced;
+  const suffixEuroMonth = t("parameters.suffix.euroMonth");
+  const suffixPercent = t("parameters.suffix.percent");
+
+  const labelWithCode = (key: string, code: string, name?: string) => {
+    const base = t(key, name ? { name } : undefined);
+    return inputs.advanced ? `${base}${t("parameters.codeSuffix", { code })}` : base;
+  };
+
+  const salaryLabelA = labelWithCode("parameters.salaryLabel", "a1", partnerAName);
+  const salaryLabelB = labelWithCode("parameters.salaryLabel", "b", partnerBName);
+  const ticketsLabelA = labelWithCode("parameters.ticketsLabel", "a2", partnerAName);
+  const ticketsLabelB = labelWithCode("parameters.ticketsLabel", "b2", partnerBName);
+  const sharedBudgetLabel = labelWithCode("parameters.sharedBudgetLabel", "m");
+  const salaryTooltipA = t("parameters.salaryTooltip", { name: partnerAName });
+  const salaryTooltipB = t("parameters.salaryTooltip", { name: partnerBName });
+  const ticketsTooltipA = t("parameters.ticketsTooltip", { name: partnerAName });
+  const ticketsTooltipB = t("parameters.ticketsTooltip", { name: partnerBName });
+  const sharedBudgetTooltip = t("parameters.sharedBudgetTooltip");
 
   useEffect(() => {
     saveState(inputs);
@@ -104,7 +128,7 @@ export default function App() {
   const copyLink = async () => {
     const url = toQuery(inputs);
     await navigator.clipboard.writeText(url);
-    alert("Lien copié dans le presse-papiers.");
+    alert(t("actions.copyLinkSuccess"));
   };
 
   const reset = () => {
@@ -118,7 +142,9 @@ export default function App() {
   const handleModeChange = (mode: SplitMode) => {
     setInputs((prev) => ({ ...prev, mode }));
     setAriaMessage(
-      mode === "equal_leftover" ? "Mode reste à vivre égal activé" : "Mode proportionnel activé",
+      mode === "equal_leftover"
+        ? t("accessibility.modeEqualLeftover")
+        : t("accessibility.modeProportional"),
     );
   };
 
@@ -131,14 +157,12 @@ export default function App() {
   };
 
   const handleHistoryCleared = () => {
-    setAriaMessage("Historique effacé");
+    setAriaMessage(t("accessibility.historyCleared"));
   };
 
   const handleLoadHistory = (item: HistoryItem) => {
     if (isDirty) {
-      const confirmed = window.confirm(
-        "Charger cet enregistrement va remplacer les valeurs actuelles. Continuer ?",
-      );
+      const confirmed = window.confirm(t("actions.confirmLoad"));
       if (!confirmed) return;
     }
 
@@ -146,8 +170,8 @@ export default function App() {
     setInputs(snapshot);
     setLastLoadedInputs(snapshot);
 
-    const formattedDate = new Date(item.dateISO).toLocaleDateString("fr-FR");
-    setAriaMessage(`Enregistrement du ${formattedDate} chargé`);
+    const formattedDate = new Date(item.dateISO).toLocaleDateString(locale);
+    setAriaMessage(t("accessibility.historyLoaded", { date: formattedDate }));
 
     window.scrollTo({ top: 0, behavior: "smooth" });
     window.setTimeout(() => {
@@ -169,15 +193,13 @@ export default function App() {
                 ref={titleRef}
                 tabIndex={-1}
               >
-                💞 Équilibre couple — calculateur
+                {t("header.title")}
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Ajustez vos contributions communes en quelques secondes et visualisez un partage
-                équilibré, clair et apaisant.
-              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-300">{t("header.description")}</p>
             </div>
             <div className="no-print flex flex-col items-center gap-3 md:items-end">
               <div className="flex items-center gap-2">
+                <LanguageSwitcher />
                 <ThemeToggle />
                 {inputs.advanced && <GlossaryButton />}
               </div>
@@ -188,16 +210,16 @@ export default function App() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  GitHub
+                  {t("header.github")}
                 </a>
                 <button onClick={copyLink} className="btn btn-ghost">
-                  Copier le lien
+                  {t("actions.copyLink")}
                 </button>
                 <button onClick={printPDF} className="btn btn-ghost">
-                  Imprimer / PDF
+                  {t("actions.print")}
                 </button>
                 <button onClick={reset} className="btn btn-danger">
-                  Réinitialiser
+                  {t("actions.reset")}
                 </button>
               </div>
             </div>
@@ -211,37 +233,31 @@ export default function App() {
         <div className="mt-10 flex flex-col gap-10">
           <section className="card space-y-6">
             <div className="space-y-1">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Paramètres</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Personnalisez les revenus, les tickets restaurant et le budget commun pour obtenir
-                une proposition sur-mesure.
-              </p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t("parameters.title")}</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("parameters.description")}</p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
               <TextField
                 id="partnerAName"
-                label="Nom partenaire A"
+                label={t("parameters.partnerNameLabel", { label: "A" })}
                 value={inputs.partnerAName}
                 onChange={(value) => setInputs({ ...inputs, partnerAName: value })}
-                placeholder="Partenaire A"
-                tooltip="Personnalise le nom utilisé pour le partenaire A dans les calculs et graphiques"
+                placeholder={partnerPlaceholderA}
+                tooltip={t("parameters.partnerTooltip", { label: "A" })}
               />
               <TextField
                 id="partnerBName"
-                label="Nom partenaire B"
+                label={t("parameters.partnerNameLabel", { label: "B" })}
                 value={inputs.partnerBName}
                 onChange={(value) => setInputs({ ...inputs, partnerBName: value })}
-                placeholder="Partenaire B"
-                tooltip="Personnalise le nom utilisé pour le partenaire B dans les calculs et graphiques"
+                placeholder={partnerPlaceholderB}
+                tooltip={t("parameters.partnerTooltip", { label: "B" })}
               />
               <fieldset className="space-y-3 sm:col-span-2" aria-describedby="mode-tip">
                 <legend className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200">
-                  <span>Mode de répartition</span>
-                  <InfoIcon
-                    title="Proportionnel : chacun contribue selon ses moyens. Reste à vivre égal : chacun garde le même reste cash après contribution."
-                    tooltipId="mode-tip"
-                  />
+                  <span>{t("parameters.modeLabel")}</span>
+                  <InfoIcon title={t("parameters.modeTooltip")} tooltipId="mode-tip" />
                 </legend>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="mode-option">
@@ -254,9 +270,9 @@ export default function App() {
                       className="mode-option__input"
                     />
                     <div className="mode-option__content">
-                      <span className="mode-option__title">Proportionnel</span>
+                      <span className="mode-option__title">{t("parameters.modes.proportional.title")}</span>
                       <span className="mode-option__description">
-                        Chacun contribue selon ses moyens, tickets resto inclus.
+                        {t("parameters.modes.proportional.description")}
                       </span>
                     </div>
                   </label>
@@ -270,9 +286,9 @@ export default function App() {
                       className="mode-option__input"
                     />
                     <div className="mode-option__content">
-                      <span className="mode-option__title">Reste à vivre égal</span>
+                      <span className="mode-option__title">{t("parameters.modes.equal_leftover.title")}</span>
                       <span className="mode-option__description">
-                        Alignement du cash restant après contribution pour chaque partenaire.
+                        {t("parameters.modes.equal_leftover.description")}
                       </span>
                     </div>
                   </label>
@@ -280,43 +296,43 @@ export default function App() {
               </fieldset>
               <InputField
                 id="a1"
-                label={`Salaire ${partnerAName}${inputs.advanced ? " (a1)" : ""}`}
+                label={salaryLabelA}
                 value={inputs.a1}
                 onChange={(v) => setInputs({ ...inputs, a1: v })}
-                suffix="€ / mois"
-                tooltip={`Salaire net mensuel de ${partnerAName}`}
+                suffix={suffixEuroMonth}
+                tooltip={salaryTooltipA}
               />
               <InputField
                 id="b"
-                label={`Salaire ${partnerBName}${inputs.advanced ? " (b)" : ""}`}
+                label={salaryLabelB}
                 value={inputs.b}
                 onChange={(v) => setInputs({ ...inputs, b: v })}
-                suffix="€ / mois"
-                tooltip={`Salaire net mensuel de ${partnerBName}`}
+                suffix={suffixEuroMonth}
+                tooltip={salaryTooltipB}
               />
               <InputField
                 id="a2"
-                label={`Tickets resto ${partnerAName}${inputs.advanced ? " (a2)" : ""}`}
+                label={ticketsLabelA}
                 value={inputs.a2}
                 onChange={(v) => setInputs({ ...inputs, a2: v })}
-                suffix="€ / mois"
-                tooltip={`Montant mensuel brut de tickets restaurant crédités pour ${partnerAName}`}
+                suffix={suffixEuroMonth}
+                tooltip={ticketsTooltipA}
               />
               <InputField
                 id="b2"
-                label={`Tickets resto ${partnerBName}${inputs.advanced ? " (b2)" : ""}`}
+                label={ticketsLabelB}
                 value={inputs.b2}
                 onChange={(v) => setInputs({ ...inputs, b2: v })}
-                suffix="€ / mois"
-                tooltip={`Montant mensuel brut de tickets restaurant crédités pour ${partnerBName}`}
+                suffix={suffixEuroMonth}
+                tooltip={ticketsTooltipB}
               />
               <InputField
                 id="m"
-                label={`Budget commun hors TR${inputs.advanced ? " (m)" : ""}`}
+                label={sharedBudgetLabel}
                 value={inputs.m}
                 onChange={(v) => setInputs({ ...inputs, m: v })}
-                suffix="€ / mois"
-                tooltip="Part du budget commun non éligible TR (cash)"
+                suffix={suffixEuroMonth}
+                tooltip={sharedBudgetTooltip}
               />
               <div className="sm:col-span-2">
                 <div className="rounded-3xl border border-dashed border-rose-200/80 bg-white/70 p-4 shadow-sm transition-colors duration-300 ease-out dark:border-rose-500/40 dark:bg-gray-900/40">
@@ -332,9 +348,9 @@ export default function App() {
                     aria-controls="advanced-panel"
                   >
                     <div className="flex flex-col gap-1 text-left">
-                      <span className="text-sm font-semibold">Mode avancé</span>
+                      <span className="text-sm font-semibold">{t("parameters.advancedToggle.title")}</span>
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        Ajouter les dépenses éligibles et ajuster finement la contribution.
+                        {t("parameters.advancedToggle.description")}
                       </span>
                     </div>
                     <span
@@ -346,9 +362,7 @@ export default function App() {
                       ▾
                     </span>
                   </button>
-                  <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">
-                    Permet de saisir E = dépenses éligibles TR (au‑delà des TR)
-                  </p>
+                  <p className="mt-3 text-sm text-gray-600 dark:text-gray-300">{t("parameters.advancedToggle.helper")}</p>
                   <div
                     id="advanced-panel"
                     ref={advancedRef}
@@ -359,29 +373,29 @@ export default function App() {
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <InputField
                         id="trPct"
-                        label="% TR effectivement dépensés"
+                        label={t("parameters.trPctLabel")}
                         value={inputs.trPct}
                         onChange={(v) => setInputs({ ...inputs, trPct: v })}
-                        suffix="%"
+                        suffix={suffixPercent}
                         min={0}
                         max={100}
                         step={1}
-                        tooltip="Pourcentage des TR réellement consommés"
+                        tooltip={t("parameters.trPctTooltip")}
                         disabled={advancedCollapsed}
                       />
                       <InputField
                         id="E"
-                        label="Dépenses éligibles TR (E)"
+                        label={t("parameters.eligibleLabel")}
                         value={inputs.E}
                         onChange={(v) => setInputs({ ...inputs, E: v })}
-                        suffix="€ / mois"
-                        tooltip="Montant mensuel des dépenses éligibles (courses/resto) qui peuvent être payées en TR"
+                        suffix={suffixEuroMonth}
+                        tooltip={t("parameters.eligibleTooltip")}
                         disabled={advancedCollapsed}
                       />
                       <label className="flex flex-col gap-4 rounded-2xl border border-gray-200/80 bg-white/70 p-4 shadow-sm transition-colors duration-300 ease-out dark:border-gray-700/60 dark:bg-gray-900/40 sm:col-span-2">
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                           <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                            Ajustement du prorata (favoriser {partnerAName} ou {partnerBName})
+                            {t("parameters.bias.label", { partnerA: partnerAName, partnerB: partnerBName })}
                           </span>
                           <div className="flex flex-col items-start gap-1 text-xs font-medium text-gray-500 sm:items-end sm:text-right dark:text-gray-400">
                             <span
@@ -391,7 +405,7 @@ export default function App() {
                                   : "translate-y-0 text-gray-500 opacity-80 dark:text-gray-400"
                               }`}
                             >
-                              {formatBiasSummary(inputs.biasPts, partnerAName, partnerBName)}
+                              {formatBiasSummary(inputs.biasPts, partnerAName, partnerBName, t)}
                             </span>
                             <span
                               className={`transition-all duration-200 ease-out ${
@@ -400,7 +414,7 @@ export default function App() {
                                   : "text-gray-500 opacity-80 dark:text-gray-400"
                               }`}
                             >
-                              {formatBiasForPartner(inputs.biasPts, partnerAName)}
+                              {formatBiasForPartner(inputs.biasPts, partnerAName, t)}
                             </span>
                           </div>
                         </div>
@@ -413,24 +427,23 @@ export default function App() {
                           onChange={(e) =>
                             setInputs({ ...inputs, biasPts: parseFloat(e.target.value) })
                           }
-                          aria-label={`Ajustement du prorata (${partnerAName} ↔ ${partnerBName})`}
+                          aria-label={t("parameters.bias.sliderLabel", { partnerA: partnerAName, partnerB: partnerBName })}
                           className={`w-full accent-rose-500 transition-transform duration-200 ease-out ${
                             biasHighlight ? "scale-[1.01]" : "scale-100"
                           }`}
                           disabled={advancedCollapsed || biasDisabled}
                         />
                         <div className="flex justify-between text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                          <span>Favoriser {partnerAName}</span>
-                          <span>Neutre</span>
-                          <span>Favoriser {partnerBName}</span>
+                          <span>{t("parameters.bias.favorA", { name: partnerAName })}</span>
+                          <span>{t("parameters.bias.neutral")}</span>
+                          <span>{t("parameters.bias.favorB", { name: partnerBName })}</span>
                         </div>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          Valeur positive: favorise {partnerBName} ({partnerAName} paie davantage).
-                          Valeur négative: favorise {partnerAName} ({partnerAName} paie moins).
+                          {t("parameters.bias.helper", { partnerA: partnerAName, partnerB: partnerBName })}
                         </span>
                         {biasDisabled && (
                           <span className="field-help text-amber-600 dark:text-amber-400">
-                            Biais non applicable en mode “Reste à vivre égal”.
+                            {t("parameters.bias.disabled")}
                           </span>
                         )}
                       </label>
@@ -499,6 +512,7 @@ function areInputsEqual(a: Inputs, b: Inputs) {
 }
 
 function ThemeToggle() {
+  const { t } = useTranslation();
   const [dark, setDark] = useState(
     () => window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
@@ -514,10 +528,36 @@ function ThemeToggle() {
       className="btn btn-ghost transition-transform duration-300 ease-out hover:scale-105 active:scale-95"
       onClick={() => setDark((d) => !d)}
       aria-pressed={dark}
-      aria-label="Basculer mode sombre"
+      aria-label={t("accessibility.toggleDarkMode")}
     >
       {dark ? "🌙" : "☀️"}
     </button>
+  );
+}
+
+function LanguageSwitcher() {
+  const { t, i18n } = useTranslation();
+  const current = i18n.language.startsWith("fr") ? "fr" : "en";
+
+  return (
+    <div className="relative">
+      <label htmlFor="language-select" className="sr-only">
+        {t("accessibility.languageSwitcher")}
+      </label>
+      <select
+        id="language-select"
+        className="input w-28 cursor-pointer appearance-none pr-8 text-sm"
+        value={current}
+        onChange={(event) => {
+          const next = event.target.value;
+          void i18n.changeLanguage(next);
+        }}
+      >
+        <option value="fr">{t("languages.fr")}</option>
+        <option value="en">{t("languages.en")}</option>
+      </select>
+      <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-500">▾</span>
+    </div>
   );
 }
 
@@ -539,15 +579,26 @@ function useHighlightOnChange(value: number, duration = 250) {
   return highlight;
 }
 
-function formatBiasSummary(value: number, partnerAName: string, partnerBName: string) {
+function formatBiasSummary(
+  value: number,
+  partnerAName: string,
+  partnerBName: string,
+  t: TFunction,
+) {
   const normalized = Math.abs(value) < 1e-6 ? 0 : value;
-  if (normalized === 0) return "Neutre";
-  if (normalized > 0) return `Favorise ${partnerBName} (+${normalized.toFixed(1)} pts)`;
-  return `Favorise ${partnerAName} (${normalized.toFixed(1)} pts)`;
+  if (normalized === 0) return t("parameters.bias.summaryNeutral");
+  const points = `${normalized > 0 ? "+" : ""}${normalized.toFixed(1)}`;
+  if (normalized > 0) {
+    return t("parameters.bias.summaryFavor", { name: partnerBName, points });
+  }
+  return t("parameters.bias.summaryFavor", { name: partnerAName, points });
 }
 
-function formatBiasForPartner(value: number, partnerName: string) {
+function formatBiasForPartner(value: number, partnerName: string, t: TFunction) {
   const normalized = Math.abs(value) < 1e-6 ? 0 : value;
   const sign = normalized > 0 ? "+" : normalized < 0 ? "" : "+";
-  return `${sign}${normalized.toFixed(1)} points pour ${partnerName}`;
+  return t("parameters.bias.summaryDetail", {
+    name: partnerName,
+    points: `${sign}${normalized.toFixed(1)}`,
+  });
 }

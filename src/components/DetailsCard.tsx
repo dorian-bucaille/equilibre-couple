@@ -1,5 +1,6 @@
 /* eslint-env browser */
 import React, { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Result } from "../lib/types";
 import { useCollapse } from "../hooks/useCollapse";
 
@@ -8,6 +9,7 @@ export type DetailsCardHandle = {
 };
 
 export const DetailsCard = forwardRef<DetailsCardHandle, { r: Result }>(({ r }, ref) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const containerRef = useCollapse(open);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -41,7 +43,7 @@ export const DetailsCard = forwardRef<DetailsCardHandle, { r: Result }>(({ r }, 
           tabIndex={-1}
           className="text-lg font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
         >
-          Détails du calcul
+          {t("details.title")}
         </h2>
         <button
           className="no-print btn btn-ghost"
@@ -49,7 +51,7 @@ export const DetailsCard = forwardRef<DetailsCardHandle, { r: Result }>(({ r }, 
           aria-expanded={open}
           aria-controls="details-panel"
         >
-          {open ? "Masquer les détails" : "Afficher les détails"}
+          {open ? t("details.hide") : t("details.show")}
         </button>
       </div>
 
@@ -68,7 +70,7 @@ export const DetailsCard = forwardRef<DetailsCardHandle, { r: Result }>(({ r }, 
           </ul>
           {r.warnings.length > 0 && (
             <div className="mt-3">
-              <div className="font-semibold">Avertissements</div>
+              <div className="font-semibold">{t("details.warnings")}</div>
               <ul className="list-disc ml-5 text-amber-600">
                 {r.warnings.map((w, i) => (
                   <li key={i}>{w}</li>
@@ -76,9 +78,10 @@ export const DetailsCard = forwardRef<DetailsCardHandle, { r: Result }>(({ r }, 
               </ul>
             </div>
           )}
-          <p className="mt-3 text-gray-500">
-            Note: les tickets resto sont comptés comme une <strong>contribution en nature</strong>.
-          </p>
+          <p
+            className="mt-3 text-gray-500"
+            dangerouslySetInnerHTML={{ __html: t("details.note") }}
+          />
         </div>
       </div>
     </div>
