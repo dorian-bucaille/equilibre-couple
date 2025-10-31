@@ -6,7 +6,8 @@ import { InputField } from "./components/InputField";
 import { SummaryCard } from "./components/SummaryCard";
 import { DetailsCard } from "./components/DetailsCard";
 import { GlossaryButton } from "./components/GlossaryButton";
-import { loadState, saveState } from "./lib/storage";
+import { History, type HistoryHandle } from "./components/History";
+import { loadState, saveState, type HistoryItem } from "./lib/storage";
 import { useCollapse } from "./hooks/useCollapse";
 import "./styles.css";
 import { TextField } from "./components/TextField";
@@ -66,8 +67,13 @@ export default function App() {
     const merged = parseQuery(loaded);
     return merged;
   });
+  const [lastLoadedInputs, setLastLoadedInputs] = useState<Inputs>(inputs);
+  const [ariaMessage, setAriaMessage] = useState("");
+  const historyRef = useRef<HistoryHandle>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const biasHighlight = useHighlightOnChange(inputs.biasPts);
   const advancedRef = useCollapse(inputs.advanced);
+  const isDirty = useMemo(() => !areInputsEqual(inputs, lastLoadedInputs), [inputs, lastLoadedInputs]);
 
   const partnerAName = inputs.partnerAName.trim() || "Partenaire A";
   const partnerBName = inputs.partnerBName.trim() || "Partenaire B";
@@ -84,14 +90,55 @@ export default function App() {
     alert("Lien copié dans le presse-papiers.");
   };
 
-  const reset = () => setInputs(DEFAULTS);
+  const reset = () => {
+    const fresh = { ...DEFAULTS };
+    setInputs(fresh);
+    setLastLoadedInputs(fresh);
+  };
 
   const printPDF = () => window.print();
+
+  const handleSummarySave = () => {
+    historyRef.current?.addCurrentState();
+  };
+
+  const handleSummaryFocusNote = () => {
+    historyRef.current?.focusNote();
+  };
+
+  const handleHistoryCleared = () => {
+    setAriaMessage("Historique effacé");
+  };
+
+  const handleLoadHistory = (item: HistoryItem) => {
+    if (isDirty) {
+      const confirmed = window.confirm(
+        "Charger cet enregistrement va remplacer les valeurs actuelles. Continuer ?",
+      );
+      if (!confirmed) return;
+    }
+
+    const snapshot = JSON.parse(JSON.stringify(item.inputs)) as Inputs;
+    setInputs(snapshot);
+    setLastLoadedInputs(snapshot);
+
+    const formattedDate = new Date(item.dateISO).toLocaleDateString("fr-FR");
+    setAriaMessage(`Enregistrement du ${formattedDate} chargé`);
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.setTimeout(() => {
+      titleRef.current?.focus();
+    }, 300);
+  };
 
   return (
     <div className="max-w-3xl mx-auto space-y-5 px-4 py-6 sm:p-6 transition-colors duration-300 ease-out">
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-center text-2xl font-bold md:text-left">
+        <h1
+          className="text-center text-2xl font-bold md:text-left"
+          ref={titleRef}
+          tabIndex={-1}
+        >
           Équilibre couple — calculateur
         </h1>
         <div className="no-print flex flex-wrap items-center justify-center gap-2 md:justify-end">
@@ -102,6 +149,10 @@ export default function App() {
           <button onClick={reset} className="btn btn-danger">Réinitialiser</button>
         </div>
       </header>
+
+      <div aria-live="polite" className="sr-only">
+        {ariaMessage}
+      </div>
 
       <section className="card space-y-3">
         <h2 className="text-lg font-semibold">Paramètres</h2>
@@ -264,7 +315,13 @@ export default function App() {
         </div>
       </section>
 
-      <SummaryCard r={result} partnerAName={partnerAName} partnerBName={partnerBName} />
+      <SummaryCard
+        r={result}
+        partnerAName={partnerAName}
+        partnerBName={partnerBName}
+        onSaveHistory={handleSummarySave}
+        onFocusNote={handleSummaryFocusNote}
+      />
       <DetailsCard r={result} />
 
       {result.warnings.length > 0 && (
@@ -277,11 +334,37 @@ export default function App() {
         </div>
       )}
 
+      <History
+        ref={historyRef}
+        inputs={inputs}
+        result={result}
+        onLoad={handleLoadHistory}
+        onRequestClearAll={handleHistoryCleared}
+      />
+
       <footer className="text-sm text-gray-500">
         Somme des dépôts: {euro(result.depositD + result.depositM)} — Cash requis: {euro(result.cashNeeded)}.
       </footer>
     </div>
   );
+}
+
+function areInputsEqual(a: Inputs, b: Inputs) {
+  const keys: (keyof Inputs)[] = [
+    "partnerAName",
+    "partnerBName",
+    "a1",
+    "a2",
+    "b2",
+    "trPct",
+    "b",
+    "m",
+    "advanced",
+    "E",
+    "biasPts",
+  ];
+
+  return keys.every((key) => a[key] === b[key]);
 }
 
 function ThemeToggle() {
