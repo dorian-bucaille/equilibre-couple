@@ -133,18 +133,20 @@ export const CalculationInfoCard: React.FC<CalculationInfoCardProps> = ({ onRequ
             </div>
           </div>
 
-          <div>
-            <a
-              href="#details-section"
-              className="text-sm font-medium text-blue-700 underline underline-offset-2 transition-colors hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
-              onClick={(event) => {
-                event.preventDefault();
-                onRequestDetails();
-              }}
-            >
-              Voir les formules détaillées
-            </a>
-          </div>
+          {open && (
+            <div>
+              <a
+                href="#details-section"
+                className="text-sm font-medium text-blue-700 underline underline-offset-2 transition-colors hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-200"
+                onClick={(event) => {
+                  event.preventDefault();
+                  onRequestDetails();
+                }}
+              >
+                Voir les formules détaillées
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </section>

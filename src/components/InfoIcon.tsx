@@ -7,14 +7,21 @@ type OutsidePointerEvent = globalThis.MouseEvent | globalThis.TouchEvent;
 type InfoIconProps = {
   title?: string;
   tooltipId?: string;
+  disabled?: boolean;
 };
 
-export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId }) => {
+export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId, disabled = false }) => {
   const generatedId = React.useId();
   const id = tooltipId ?? generatedId;
   const [open, setOpen] = React.useState(false);
   const containerRef = React.useRef<SpanElement | null>(null);
   const isPointerDownRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (disabled && open) {
+      setOpen(false);
+    }
+  }, [disabled, open]);
 
   React.useEffect(() => {
     if (!open) {
@@ -48,27 +55,42 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId }) => {
   }, []);
 
   const handlePointerEnter = (event: React.PointerEvent<ButtonElement>) => {
+    if (disabled) {
+      return;
+    }
     if (event.pointerType === "mouse" && !isPointerDownRef.current) {
       setOpen(true);
     }
   };
 
   const handlePointerLeave = (event: React.PointerEvent<ButtonElement>) => {
+    if (disabled) {
+      return;
+    }
     if (event.pointerType === "mouse" && !isPointerDownRef.current) {
       close();
     }
   };
 
   const handleClick = (event: React.MouseEvent<ButtonElement>) => {
+    if (disabled) {
+      return;
+    }
     event.preventDefault();
     setOpen((previous) => !previous);
   };
 
   const handlePointerDown = (event: React.PointerEvent<ButtonElement>) => {
+    if (disabled) {
+      return;
+    }
     isPointerDownRef.current = event.pointerType !== "mouse";
   };
 
   const handlePointerUp = () => {
+    if (disabled) {
+      return;
+    }
     isPointerDownRef.current = false;
   };
 
@@ -79,8 +101,10 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId }) => {
         className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-600/20 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-blue-300"
         title={title}
         aria-label="Informations complémentaires"
-        aria-describedby={id}
-        aria-expanded={open}
+        aria-describedby={disabled ? undefined : id}
+        aria-expanded={disabled ? false : open}
+        aria-hidden={disabled || undefined}
+        disabled={disabled}
         onPointerEnter={handlePointerEnter}
         onPointerLeave={handlePointerLeave}
         onPointerDown={handlePointerDown}
@@ -97,6 +121,7 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId }) => {
         className={`absolute left-1/2 z-10 mt-2 w-48 max-w-xs -translate-x-1/2 rounded-md bg-slate-900 px-3 py-2 text-xs text-white shadow-lg transition-opacity duration-150 ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
+        aria-hidden={disabled || !open}
       >
         {title}
       </div>
