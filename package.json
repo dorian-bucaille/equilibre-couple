@@ -11,7 +11,7 @@
         "format": "prettier -w .",
         "test": "vitest run",
         "test:watch": "vitest",
-        "lighthouse:ci": "npx @lhci/cli@0.14.3 autorun"
+        "lighthouse:ci": "npx @lhci/cli@0.14.0 autorun"
     },
     "dependencies": {
         "react": "^18.3.1",
