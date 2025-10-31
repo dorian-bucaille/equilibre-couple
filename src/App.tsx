@@ -120,7 +120,7 @@ export default function App() {
       const message = "Lien copié dans le presse-papiers.";
       setAriaMessage(message);
       setCopyTooltip({ message, tone: "success" });
-    } catch (error) {
+    } catch {
       const message = "Impossible de copier le lien automatiquement.";
       setAriaMessage(message);
       setCopyTooltip({ message, tone: "error" });
