@@ -34,10 +34,6 @@ export default [
         location: true,
         navigator: true,
         alert: true,
-        HTMLDivElement: true,
-        KeyboardEvent: true,
-        MouseEvent: true,
-        Node: true,
       },
     },
     plugins: {
@@ -52,6 +48,8 @@ export default [
       ...reactHooks.configs.recommended.rules,
       // Vite react-refresh
       "react-refresh/only-export-components": "warn",
+      // géré par TypeScript
+      "no-undef": "off",
     },
   },
 
