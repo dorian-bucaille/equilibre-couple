@@ -5,6 +5,18 @@
 @layer base {
   :root {
     --radius: 0.5rem;
+    --chart-empty: #f1f5f9;
+    --chart-a-deposit: #e2558f;
+    --chart-a-tr: #f7a2c3;
+    --chart-b-deposit: #b065c2;
+    --chart-b-tr: #d8adeb;
+  }
+  .dark {
+    --chart-empty: #1e293b;
+    --chart-a-deposit: #ff6fa8;
+    --chart-a-tr: #fbbcd6;
+    --chart-b-deposit: #c585dd;
+    --chart-b-tr: #e2c2f4;
   }
   html { font-family: theme('fontFamily.sans'); }
   body {
