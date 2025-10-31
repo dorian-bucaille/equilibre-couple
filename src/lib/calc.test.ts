@@ -3,6 +3,8 @@ import { calculate } from "./calc";
 import type { Inputs } from "./types";
 
 const base: Inputs = {
+  partnerAName: "Partenaire A",
+  partnerBName: "Partenaire B",
   a1: 2000,
   a2: 175,
   trPct: 100,

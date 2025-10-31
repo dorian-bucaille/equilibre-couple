@@ -9,8 +9,11 @@ import { GlossaryButton } from "./components/GlossaryButton";
 import { loadState, saveState } from "./lib/storage";
 import { useCollapse } from "./hooks/useCollapse";
 import "./styles.css";
+import { TextField } from "./components/TextField";
 
 const DEFAULTS: Inputs = {
+  partnerAName: "Partenaire A",
+  partnerBName: "Partenaire B",
   a1: 2000,
   a2: 175,
   b2: 0,
@@ -27,6 +30,8 @@ function parseQuery(defaults: Inputs): Inputs {
   const g = (k: keyof Inputs) => u.searchParams.get(String(k));
   const num = (v: string | null, d: number) => (v ? Number(v) : d);
   return {
+    partnerAName: (u.searchParams.get("nameA") ?? defaults.partnerAName) || "",
+    partnerBName: (u.searchParams.get("nameB") ?? defaults.partnerBName) || "",
     a1: num(g("a1"), defaults.a1),
     a2: num(g("a2"), defaults.a2),
     b2: num(g("b2"), defaults.b2),
@@ -41,6 +46,8 @@ function parseQuery(defaults: Inputs): Inputs {
 
 function toQuery(i: Inputs) {
   const p = new URLSearchParams();
+  p.set("nameA", i.partnerAName);
+  p.set("nameB", i.partnerBName);
   p.set("a1", String(i.a1));
   p.set("a2", String(i.a2));
   p.set("b2", String(i.b2));
@@ -61,6 +68,9 @@ export default function App() {
   });
   const biasHighlight = useHighlightOnChange(inputs.biasPts);
   const advancedRef = useCollapse(inputs.advanced);
+
+  const partnerAName = inputs.partnerAName.trim() || "Partenaire A";
+  const partnerBName = inputs.partnerBName.trim() || "Partenaire B";
 
   useEffect(() => {
     saveState(inputs);
@@ -97,37 +107,53 @@ export default function App() {
         <h2 className="text-lg font-semibold">Paramètres</h2>
 
         <div className="grid sm:grid-cols-2 gap-3">
+          <TextField
+            id="partnerAName"
+            label="Nom partenaire A"
+            value={inputs.partnerAName}
+            onChange={(value) => setInputs({ ...inputs, partnerAName: value })}
+            placeholder="Partenaire A"
+            tooltip="Personnalise le nom utilisé pour le partenaire A dans les calculs et graphiques"
+          />
+          <TextField
+            id="partnerBName"
+            label="Nom partenaire B"
+            value={inputs.partnerBName}
+            onChange={(value) => setInputs({ ...inputs, partnerBName: value })}
+            placeholder="Partenaire B"
+            tooltip="Personnalise le nom utilisé pour le partenaire B dans les calculs et graphiques"
+          />
           <InputField
             id="a1"
-            label={`Salaire Partenaire A${inputs.advanced ? " (a1)" : ""}`}
+            label={`Salaire ${partnerAName}${inputs.advanced ? " (a1)" : ""}`}
             value={inputs.a1}
             onChange={(v) => setInputs({ ...inputs, a1: v })}
             suffix="€ / mois"
-            tooltip="Salaire net mensuel du partenaire A"
+            tooltip={`Salaire net mensuel de ${partnerAName}`}
           />
           <InputField
             id="b"
-            label={`Salaire Partenaire B${inputs.advanced ? " (b)" : ""}`}
+            label={`Salaire ${partnerBName}${inputs.advanced ? " (b)" : ""}`}
             value={inputs.b}
             onChange={(v) => setInputs({ ...inputs, b: v })}
             suffix="€ / mois"
-            tooltip="Salaire net mensuel du partenaire B"
+            tooltip={`Salaire net mensuel de ${partnerBName}`}
           />
           <InputField
             id="a2"
-            label={`Tickets resto Partenaire A${inputs.advanced ? " (a2)" : ""}`}
+            label={`Tickets resto ${partnerAName}${inputs.advanced ? " (a2)" : ""}`}
             value={inputs.a2}
             onChange={(v) => setInputs({ ...inputs, a2: v })}
             suffix="€ / mois"
-            tooltip="Montant mensuel brut de tickets restaurant crédités"
+            tooltip={`Montant mensuel brut de tickets restaurant crédités pour ${partnerAName}`}
           />
           <InputField
             id="b2"
-            label={`Tickets resto Partenaire B${inputs.advanced ? " (b2)" : ""}`}
+            label={`Tickets resto ${partnerBName}${inputs.advanced ? " (b2)" : ""}`}
             value={inputs.b2}
             onChange={(v) => setInputs({ ...inputs, b2: v })}
             suffix="€ / mois"
-            tooltip="Montant mensuel brut de tickets restaurant crédités pour le partenaire B"
+            tooltip={`Montant mensuel brut de tickets restaurant crédités pour ${partnerBName}`}
           />
           <InputField
             id="m"
@@ -190,7 +216,7 @@ export default function App() {
                   />
                   <label className="flex flex-col gap-1 sm:col-span-2">
                     <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                      <span className="font-medium">Ajustement du prorata (favoriser A ou B)</span>
+                      <span className="font-medium">Ajustement du prorata (favoriser {partnerAName} ou {partnerBName})</span>
                       <span
                         className={`inline-block text-sm transition-all duration-200 ease-out sm:text-right ${
                           biasHighlight
@@ -198,7 +224,7 @@ export default function App() {
                             : "translate-y-0 opacity-80 text-gray-500 dark:text-gray-400"
                         }`}
                       >
-                        {formatBiasSummary(inputs.biasPts)}
+                        {formatBiasSummary(inputs.biasPts, partnerAName, partnerBName)}
                       </span>
                       <span
                         className={`text-sm transition-all duration-200 ease-out ${
@@ -207,7 +233,7 @@ export default function App() {
                             : "opacity-80 text-gray-500 dark:text-gray-400"
                         }`}
                       >
-                        {formatBiasForPartnerA(inputs.biasPts)}
+                        {formatBiasForPartner(inputs.biasPts, partnerAName)}
                       </span>
                     </div>
                     <input
@@ -217,18 +243,18 @@ export default function App() {
                       step={0.5}
                       value={inputs.biasPts}
                       onChange={(e) => setInputs({ ...inputs, biasPts: parseFloat(e.target.value) })}
-                      aria-label="Ajustement du prorata (A ↔ B)"
+                      aria-label={`Ajustement du prorata (${partnerAName} ↔ ${partnerBName})`}
                       className={`w-full accent-blue-600 transition-transform duration-200 ease-out ${
                         biasHighlight ? "scale-[1.02]" : "scale-100"
                       }`}
                     />
                     <div className="flex justify-between text-xs text-gray-500">
-                      <span>Favoriser A</span>
+                      <span>Favoriser {partnerAName}</span>
                       <span>Neutre</span>
-                      <span>Favoriser B</span>
+                      <span>Favoriser {partnerBName}</span>
                     </div>
                     <span className="text-xs text-gray-500">
-                      Valeur positive: favorise B (A paie davantage). Valeur négative: favorise A (A paie moins).
+                      Valeur positive: favorise {partnerBName} ({partnerAName} paie davantage). Valeur négative: favorise {partnerAName} ({partnerAName} paie moins).
                     </span>
                   </label>
                 </div>
@@ -238,7 +264,7 @@ export default function App() {
         </div>
       </section>
 
-      <SummaryCard r={result} />
+      <SummaryCard r={result} partnerAName={partnerAName} partnerBName={partnerBName} />
       <DetailsCard r={result} />
 
       {result.warnings.length > 0 && (
@@ -299,15 +325,15 @@ function useHighlightOnChange(value: number, duration = 250) {
   return highlight;
 }
 
-function formatBiasSummary(value: number) {
+function formatBiasSummary(value: number, partnerAName: string, partnerBName: string) {
   const normalized = Math.abs(value) < 1e-6 ? 0 : value;
   if (normalized === 0) return "Neutre";
-  if (normalized > 0) return `Favorise B (+${normalized.toFixed(1)} pts)`;
-  return `Favorise A (${normalized.toFixed(1)} pts)`;
+  if (normalized > 0) return `Favorise ${partnerBName} (+${normalized.toFixed(1)} pts)`;
+  return `Favorise ${partnerAName} (${normalized.toFixed(1)} pts)`;
 }
 
-function formatBiasForPartnerA(value: number) {
+function formatBiasForPartner(value: number, partnerName: string) {
   const normalized = Math.abs(value) < 1e-6 ? 0 : value;
   const sign = normalized > 0 ? "+" : normalized < 0 ? "" : "+";
-  return `${sign}${normalized.toFixed(1)} points pour le partenaire A`;
+  return `${sign}${normalized.toFixed(1)} points pour ${partnerName}`;
 }

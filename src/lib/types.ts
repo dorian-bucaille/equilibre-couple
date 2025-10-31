@@ -1,13 +1,15 @@
 export type Inputs = {
-  a1: number;      // Salaire partenaire A
-  a2: number;      // TR bruts partenaire A
-  b2: number;      // TR bruts partenaire B
-  trPct: number;   // % TR effectivement dépensés (0..100)
-  b: number;       // Salaire partenaire B
-  m: number;       // Budget commun hors TR (cash non-eligible)
+  partnerAName: string; // Nom affiché pour le partenaire A
+  partnerBName: string; // Nom affiché pour le partenaire B
+  a1: number;           // Salaire partenaire A
+  a2: number;           // TR bruts partenaire A
+  b2: number;           // TR bruts partenaire B
+  trPct: number;        // % TR effectivement dépensés (0..100)
+  b: number;            // Salaire partenaire B
+  m: number;            // Budget commun hors TR (cash non-eligible)
   advanced: boolean;
-  E: number;       // Dépenses éligibles TR (si advanced), sinon ignoré
-  biasPts: number; // Biais signé en points (-50..+50). Positif: favorise B (A paie plus). Négatif: favorise A (A paie moins)
+  E: number;            // Dépenses éligibles TR (si advanced), sinon ignoré
+  biasPts: number;      // Biais signé en points (-50..+50). Positif: favorise B (A paie plus). Négatif: favorise A (A paie moins)
 };
 
 export type Result = {
