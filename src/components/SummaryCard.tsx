@@ -1,6 +1,7 @@
 import React from "react";
 import { euro, pct } from "../lib/format";
 import type { Result } from "../lib/types";
+import { FairnessInfoCard } from "./FairnessInfoCard";
 
 type Segment = {
   label: string;
@@ -122,86 +123,90 @@ export const SummaryCard: React.FC<{
   ];
 
   return (
-    <div className="card">
-      <h2 className="text-lg font-semibold mb-2">Résumé</h2>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div>
-          <div className="text-sm text-gray-500">Part {partnerAName}</div>
-          <div className="text-xl">{pct(r.shareD_biased)}</div>
+    <section className="space-y-4">
+      <div className="card">
+        <h2 className="text-lg font-semibold mb-2">Résumé</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div>
+            <div className="text-sm text-gray-500">Part {partnerAName}</div>
+            <div className="text-xl">{pct(r.shareD_biased)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Part {partnerBName}</div>
+            <div className="text-xl">{pct(r.shareM_biased)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Dépôt {partnerAName}</div>
+            <div className="text-xl">{euro(r.depositD)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Dépôt {partnerBName}</div>
+            <div className="text-xl">{euro(r.depositM)}</div>
+          </div>
         </div>
-        <div>
-          <div className="text-sm text-gray-500">Part {partnerBName}</div>
-          <div className="text-xl">{pct(r.shareM_biased)}</div>
+
+        <hr className="my-3 border-gray-200 dark:border-gray-800" />
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div>
+            <div className="text-sm text-gray-500">Cash total à déposer</div>
+            <div className="text-lg">{euro(r.cashNeeded)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">TR utilisés (V)</div>
+            <div className="text-lg">{euro(r.V)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Pot total (M)</div>
+            <div className="text-lg">{euro(r.potTotal)}</div>
+          </div>
+          <div>
+            <div className="text-sm text-gray-500">Avertissements</div>
+            <div className="text-lg">{r.warnings.length}</div>
+          </div>
         </div>
-        <div>
-          <div className="text-sm text-gray-500">Dépôt {partnerAName}</div>
-          <div className="text-xl">{euro(r.depositD)}</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">Dépôt {partnerBName}</div>
-          <div className="text-xl">{euro(r.depositM)}</div>
+
+        <hr className="my-4 border-gray-200 dark:border-gray-800" />
+
+        <div className="flex justify-center">
+          <Chart
+            title="Répartition des contributions"
+            centerLabel={displayMode === "percent" ? "Total (%)" : "Total (€)"}
+            displayMode={displayMode}
+            segments={contributionSegments}
+            actions={
+              <div className="flex rounded-md border border-gray-200 bg-white p-0.5 text-xs font-medium shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                <button
+                  type="button"
+                  className={`rounded-sm px-2 py-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 dark:focus-visible:ring-rose-300 ${
+                    displayMode === "amount"
+                      ? "bg-rose-500 text-white dark:bg-rose-400"
+                      : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                  }`}
+                  onClick={() => setDisplayMode("amount")}
+                  aria-pressed={displayMode === "amount"}
+                >
+                  €
+                </button>
+                <button
+                  type="button"
+                  className={`rounded-sm px-2 py-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 dark:focus-visible:ring-rose-300 ${
+                    displayMode === "percent"
+                      ? "bg-rose-500 text-white dark:bg-rose-400"
+                      : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                  }`}
+                  onClick={() => setDisplayMode("percent")}
+                  aria-pressed={displayMode === "percent"}
+                >
+                  %
+                </button>
+              </div>
+            }
+          />
         </div>
       </div>
 
-      <hr className="my-3 border-gray-200 dark:border-gray-800" />
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div>
-          <div className="text-sm text-gray-500">Cash total à déposer</div>
-          <div className="text-lg">{euro(r.cashNeeded)}</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">TR utilisés (V)</div>
-          <div className="text-lg">{euro(r.V)}</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">Pot total (M)</div>
-          <div className="text-lg">{euro(r.potTotal)}</div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">Avertissements</div>
-          <div className="text-lg">{r.warnings.length}</div>
-        </div>
-      </div>
-
-      <hr className="my-4 border-gray-200 dark:border-gray-800" />
-
-      <div className="flex justify-center">
-        <Chart
-          title="Répartition des contributions"
-          centerLabel={displayMode === "percent" ? "Total (%)" : "Total (€)"}
-          displayMode={displayMode}
-          segments={contributionSegments}
-          actions={
-            <div className="flex rounded-md border border-gray-200 bg-white p-0.5 text-xs font-medium shadow-sm dark:border-gray-700 dark:bg-gray-900">
-              <button
-                type="button"
-                className={`rounded-sm px-2 py-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 dark:focus-visible:ring-rose-300 ${
-                  displayMode === "amount"
-                    ? "bg-rose-500 text-white dark:bg-rose-400"
-                    : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-                }`}
-                onClick={() => setDisplayMode("amount")}
-                aria-pressed={displayMode === "amount"}
-              >
-                €
-              </button>
-              <button
-                type="button"
-                className={`rounded-sm px-2 py-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 dark:focus-visible:ring-rose-300 ${
-                  displayMode === "percent"
-                    ? "bg-rose-500 text-white dark:bg-rose-400"
-                    : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-                }`}
-                onClick={() => setDisplayMode("percent")}
-                aria-pressed={displayMode === "percent"}
-              >
-                %
-              </button>
-            </div>
-          }
-        />
-      </div>
-    </div>
+      <FairnessInfoCard />
+    </section>
   );
 };
