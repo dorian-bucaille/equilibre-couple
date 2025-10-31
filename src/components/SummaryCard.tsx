@@ -95,7 +95,9 @@ export const SummaryCard: React.FC<{
   r: Result;
   partnerAName: string;
   partnerBName: string;
-}> = ({ r, partnerAName, partnerBName }) => {
+  onSaveHistory?: () => void;
+  onFocusNote?: () => void;
+}> = ({ r, partnerAName, partnerBName, onSaveHistory, onFocusNote }) => {
   const [displayMode, setDisplayMode] = React.useState<DisplayMode>("percent");
 
   const contributionSegments: Segment[] = [
@@ -202,6 +204,25 @@ export const SummaryCard: React.FC<{
           }
         />
       </div>
+      {(onSaveHistory || onFocusNote) && (
+        <div className="no-print mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Sauvegarder cette configuration dans l'historique local.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {onFocusNote && (
+              <button type="button" className="btn btn-ghost" onClick={onFocusNote}>
+                Ajouter une note
+              </button>
+            )}
+            {onSaveHistory && (
+              <button type="button" className="btn btn-primary" onClick={onSaveHistory}>
+                Enregistrer dans l'historique
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
