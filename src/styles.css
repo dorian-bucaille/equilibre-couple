@@ -63,13 +63,13 @@
     @apply mt-1 text-xs font-medium;
   }
   .mode-option {
-    @apply relative block;
+    @apply relative block cursor-pointer;
   }
   .mode-option__input {
     @apply sr-only;
   }
   .mode-option__content {
-    @apply flex h-full flex-col gap-1 rounded-2xl border border-gray-200/80 bg-white/70 p-4 shadow-sm transition-all duration-200 ease-out hover:border-rose-200 hover:shadow-md dark:border-gray-700/60 dark:bg-gray-900/40 dark:hover:border-rose-500/40;
+    @apply flex h-full cursor-pointer flex-col gap-1 rounded-2xl border border-gray-200/80 bg-white/70 p-4 shadow-sm transition-all duration-200 ease-out hover:border-rose-200 hover:shadow-md dark:border-gray-700/60 dark:bg-gray-900/40 dark:hover:border-rose-500/40;
   }
   .mode-option__input:checked + .mode-option__content {
     @apply border-rose-300/80 bg-rose-50/80 shadow-lg dark:border-rose-500/50 dark:bg-rose-500/10;
