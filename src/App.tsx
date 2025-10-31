@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { calculate } from "./lib/calc";
-import { euro } from "./lib/format";
 import type { Inputs } from "./lib/types";
 import { InputField } from "./components/InputField";
 import { SummaryCard } from "./components/SummaryCard";
@@ -144,6 +143,14 @@ export default function App() {
         <div className="no-print flex flex-wrap items-center justify-center gap-2 md:justify-end">
           <ThemeToggle />
           {inputs.advanced && <GlossaryButton />}
+          <a
+            href="https://github.com/dorian-bucaille/equilibre-couple"
+            className="btn btn-ghost"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
           <button onClick={copyLink} className="btn btn-ghost">Copier le lien</button>
           <button onClick={printPDF} className="btn btn-ghost">Imprimer / PDF</button>
           <button onClick={reset} className="btn btn-danger">Réinitialiser</button>
@@ -341,10 +348,6 @@ export default function App() {
         onLoad={handleLoadHistory}
         onRequestClearAll={handleHistoryCleared}
       />
-
-      <footer className="text-sm text-gray-500">
-        Somme des dépôts: {euro(result.depositD + result.depositM)} — Cash requis: {euro(result.cashNeeded)}.
-      </footer>
     </div>
   );
 }
