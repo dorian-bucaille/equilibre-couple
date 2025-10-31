@@ -33,7 +33,7 @@ export default [
         URLSearchParams: true,
         location: true,
         navigator: true,
-        alert: true
+        alert: true,
       },
     },
     plugins: {
@@ -48,6 +48,8 @@ export default [
       ...reactHooks.configs.recommended.rules,
       // Vite react-refresh
       "react-refresh/only-export-components": "warn",
+      // géré par TypeScript
+      "no-undef": "off",
     },
   },
 
