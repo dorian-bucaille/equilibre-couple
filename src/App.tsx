@@ -3,7 +3,8 @@ import { calculate } from "./lib/calc";
 import type { Inputs, SplitMode } from "./lib/types";
 import { InputField } from "./components/InputField";
 import { SummaryCard } from "./components/SummaryCard";
-import { DetailsCard } from "./components/DetailsCard";
+import { CalculationInfoCard } from "./components/CalculationInfoCard";
+import { DetailsCard, type DetailsCardHandle } from "./components/DetailsCard";
 import { GlossaryButton } from "./components/GlossaryButton";
 import { InfoIcon } from "./components/InfoIcon";
 import { History, type HistoryHandle } from "./components/History";
@@ -76,6 +77,7 @@ export default function App() {
   const [ariaMessage, setAriaMessage] = useState("");
   const historyRef = useRef<HistoryHandle>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const detailsRef = useRef<DetailsCardHandle>(null);
   const biasHighlight = useHighlightOnChange(inputs.biasPts);
   const advancedRef = useCollapse(inputs.advanced);
   const isDirty = useMemo(() => !areInputsEqual(inputs, lastLoadedInputs), [inputs, lastLoadedInputs]);
@@ -379,7 +381,12 @@ export default function App() {
         onSaveHistory={handleSummarySave}
         onFocusNote={handleSummaryFocusNote}
       />
-      <DetailsCard r={result} />
+      <CalculationInfoCard
+        onRequestDetails={() => {
+          detailsRef.current?.openAndFocus();
+        }}
+      />
+      <DetailsCard ref={detailsRef} r={result} />
 
       {result.warnings.length > 0 && (
         <div className="rounded-lg border border-amber-500/30 bg-amber-50 dark:bg-amber-900/20 p-4">
