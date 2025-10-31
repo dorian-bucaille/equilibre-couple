@@ -10,7 +10,8 @@
         "lint": "eslint \"src/**/*.{ts,tsx}\"",
         "format": "prettier -w .",
         "test": "vitest run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "lighthouse:ci": "npx @lhci/cli@0.14.3 autorun"
     },
     "dependencies": {
         "react": "^18.3.1",
