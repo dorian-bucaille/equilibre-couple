@@ -5,6 +5,7 @@ import { InputField } from "./components/InputField";
 import { SummaryCard } from "./components/SummaryCard";
 import { DetailsCard } from "./components/DetailsCard";
 import { GlossaryButton } from "./components/GlossaryButton";
+import { InfoIcon } from "./components/InfoIcon";
 import { History, type HistoryHandle } from "./components/History";
 import { loadState, saveState, type HistoryItem } from "./lib/storage";
 import { useCollapse } from "./hooks/useCollapse";
@@ -192,8 +193,14 @@ export default function App() {
             placeholder="Partenaire B"
             tooltip="Personnalise le nom utilisé pour le partenaire B dans les calculs et graphiques"
           />
-          <fieldset className="sm:col-span-2">
-            <legend className="field-label">Mode de répartition</legend>
+          <fieldset className="sm:col-span-2" aria-describedby="mode-tip">
+            <legend className="flex items-center gap-2 font-medium">
+              <span>Mode de répartition</span>
+              <InfoIcon
+                title="Proportionnel : chacun contribue selon ses moyens. Reste à vivre égal : chacun garde le même reste cash après contribution."
+                tooltipId="mode-tip"
+              />
+            </legend>
             <div className="mt-2 flex gap-4">
               <label className="inline-flex items-center gap-2">
                 <input
@@ -216,10 +223,6 @@ export default function App() {
                 <span>Reste à vivre égal</span>
               </label>
             </div>
-            <p className="field-help mt-1">
-              Proportionnel : chacun contribue selon ses moyens. Reste à vivre égal : chacun garde le même reste cash après
-              contribution.
-            </p>
           </fieldset>
           <InputField
             id="a1"
