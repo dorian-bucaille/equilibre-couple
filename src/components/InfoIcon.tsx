@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 type ButtonElement = React.ElementRef<"button">;
 type SpanElement = React.ElementRef<"span">;
@@ -11,6 +12,7 @@ type InfoIconProps = {
 };
 
 export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId, disabled = false }) => {
+  const { t } = useTranslation();
   const generatedId = React.useId();
   const id = tooltipId ?? generatedId;
   const [open, setOpen] = React.useState(false);
@@ -109,7 +111,7 @@ export const InfoIcon: React.FC<InfoIconProps> = ({ title, tooltipId, disabled =
         type="button"
         className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-600/10 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-600/20 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-blue-300"
         title={title}
-        aria-label="Informations complémentaires"
+        aria-label={t("accessibility.info")}
         aria-describedby={disabled ? undefined : id}
         aria-expanded={disabled ? false : open}
         aria-hidden={disabled || undefined}

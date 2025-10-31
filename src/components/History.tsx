@@ -1,4 +1,5 @@
 import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { euro, pct } from "../lib/format";
 import {
   loadHistory,
@@ -10,15 +11,6 @@ import type { Inputs, Result } from "../lib/types";
 
 type PeriodFilter = "all" | "3m" | "6m" | "12m";
 
-const toMonthLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString("fr-FR", { month: "short", year: "numeric" });
-
-const toFullLabel = (iso: string) =>
-  new Date(iso).toLocaleString("fr-FR", {
-    dateStyle: "full",
-    timeStyle: "short",
-  });
-
 type NumericKey = Extract<keyof Inputs, "a1" | "a2" | "b" | "b2" | "m" | "trPct" | "E" | "biasPts">;
 type BooleanKey = Extract<keyof Inputs, "advanced">;
 type TextKey = Extract<keyof Inputs, "partnerAName" | "partnerBName">;
@@ -27,20 +19,6 @@ type InputSummary =
   | { key: NumericKey; label: string; formatter?: (value: number) => string }
   | { key: BooleanKey; label: string; type: "bool" }
   | { key: TextKey; label: string; type: "text" };
-
-const INPUT_SUMMARY: InputSummary[] = [
-  { key: "a1", label: "Salaire A", formatter: euro },
-  { key: "a2", label: "TR bruts A", formatter: euro },
-  { key: "b", label: "Salaire B", formatter: euro },
-  { key: "b2", label: "TR bruts B", formatter: euro },
-  { key: "m", label: "Budget hors TR", formatter: euro },
-  { key: "trPct", label: "% TR dépensés", formatter: (value) => pct(value / 100) },
-  { key: "E", label: "Dépenses éligibles", formatter: euro },
-  { key: "biasPts", label: "Biais (pts)" },
-  { key: "advanced", label: "Mode avancé", type: "bool" },
-  { key: "partnerAName", label: "Nom A", type: "text" },
-  { key: "partnerBName", label: "Nom B", type: "text" },
-];
 
 type HistoryProps = {
   inputs: Inputs;
@@ -57,19 +35,22 @@ export type HistoryHandle = {
 const buildResultSnapshot = (
   result: Result,
   inputs: Inputs,
+  fallbackA: string,
+  fallbackB: string,
 ): HistoryResultSnapshot => ({
   depositA: result.depositD,
   depositB: result.depositM,
   cashNeeded: result.cashNeeded,
   usedTR: result.V,
-  partnerAName: inputs.partnerAName?.trim() || "Partenaire A",
-  partnerBName: inputs.partnerBName?.trim() || "Partenaire B",
+  partnerAName: inputs.partnerAName?.trim() || fallbackA,
+  partnerBName: inputs.partnerBName?.trim() || fallbackB,
 });
 
 const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryProps> = (
   { inputs, result, onLoad, onRequestClearAll },
   ref,
 ) => {
+  const { t, i18n } = useTranslation();
   const [items, setItems] = useState<HistoryItem[]>(loadHistory);
   const [note, setNote] = useState("");
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
@@ -77,11 +58,47 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
   const [period, setPeriod] = useState<PeriodFilter>("all");
   const noteInputRef = useRef<HTMLInputElement>(null);
 
+  const locale = i18n.language.startsWith("fr") ? "fr-FR" : "en-GB";
+
+  const toMonthLabel = useCallback(
+    (iso: string) =>
+      new Date(iso).toLocaleDateString(locale, { month: "short", year: "numeric" }),
+    [locale],
+  );
+
+  const toFullLabel = useCallback(
+    (iso: string) =>
+      new Date(iso).toLocaleString(locale, {
+        dateStyle: "full",
+        timeStyle: "short",
+      }),
+    [locale],
+  );
+
+  const inputSummary: InputSummary[] = useMemo(
+    () => [
+      { key: "a1", label: t("history.inputs.a1"), formatter: euro },
+      { key: "a2", label: t("history.inputs.a2"), formatter: euro },
+      { key: "b", label: t("history.inputs.b"), formatter: euro },
+      { key: "b2", label: t("history.inputs.b2"), formatter: euro },
+      { key: "m", label: t("history.inputs.m"), formatter: euro },
+      { key: "trPct", label: t("history.inputs.trPct"), formatter: (value: number) => pct(value / 100) },
+      { key: "E", label: t("history.inputs.E"), formatter: euro },
+      { key: "biasPts", label: t("history.inputs.biasPts") },
+      { key: "advanced", label: t("history.inputs.advanced"), type: "bool" },
+      { key: "partnerAName", label: t("history.inputs.partnerA"), type: "text" },
+      { key: "partnerBName", label: t("history.inputs.partnerB"), type: "text" },
+    ],
+    [t],
+  );
+
   const add = useCallback(() => {
     const trimmedNote = note.trim().slice(0, 120);
     const id = crypto.randomUUID();
     const dateISO = new Date().toISOString();
-    const snapshot = buildResultSnapshot(result, inputs);
+    const fallbackA = inputs.partnerAName?.trim() || t("parameters.partnerPlaceholder", { label: "A" });
+    const fallbackB = inputs.partnerBName?.trim() || t("parameters.partnerPlaceholder", { label: "B" });
+    const snapshot = buildResultSnapshot(result, inputs, fallbackA, fallbackB);
     const savedInputs = JSON.parse(JSON.stringify(inputs)) as Inputs;
     setItems((prev) => {
       const next = [{ id, dateISO, note: trimmedNote, inputs: savedInputs, result: snapshot }, ...prev].slice(0, 60);
@@ -89,7 +106,7 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
       return next;
     });
     setNote("");
-  }, [inputs, note, result]);
+  }, [inputs, note, result, t]);
 
   const del = (id: string) => {
     setItems((prev) => {
@@ -105,9 +122,9 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
   };
 
   const clearAll = () => {
-    const first = window.confirm("Supprimer tout l'historique local ?");
+    const first = window.confirm(t("actions.confirmClearFirst"));
     if (!first) return;
-    const second = window.confirm("Cette action est définitive. Confirmer la suppression ?");
+    const second = window.confirm(t("actions.confirmClearSecond"));
     if (!second) return;
     setItems(() => {
       saveHistory([]);
@@ -155,30 +172,28 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
       if (!matchesPeriod(item.dateISO)) return false;
       if (!term) return true;
       const label = toMonthLabel(item.dateISO).toLowerCase();
-      const noteValue = (item.note || "(sans note)").toLowerCase();
+      const noteValue = (item.note || t("history.noNote")).toLowerCase();
       return noteValue.includes(term) || label.includes(term);
     });
-  }, [items, period, searchTerm]);
+  }, [items, period, searchTerm, t, toMonthLabel]);
 
   return (
     <section className="card history-card">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Historique</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Jusqu'à 60 enregistrements sont conservés sur cet appareil.
-          </p>
+          <h2 className="text-lg font-semibold">{t("history.title")}</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t("history.description")}</p>
         </div>
         <button type="button" onClick={clearAll} className="no-print btn btn-ghost self-start" disabled={items.length === 0}>
-          Tout effacer
+          {t("history.clear")}
         </button>
       </div>
 
       <div className="no-print mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <label className="flex flex-1 flex-col gap-1">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Note</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("history.noteLabel")}</span>
             <input
-              placeholder="Oct. 2025 – nouveau loyer"
+              placeholder={t("history.notePlaceholder")}
               className="input"
               value={note}
               maxLength={120}
@@ -188,50 +203,50 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
           </label>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Recherche</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("history.searchLabel")}</span>
             <input
               type="search"
-              placeholder="Filtrer par note ou mois"
+              placeholder={t("history.searchPlaceholder")}
               className="input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Période</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{t("history.periodLabel")}</span>
             <select
               className="input"
               value={period}
               onChange={(e) => setPeriod(e.target.value as PeriodFilter)}
             >
-              <option value="all">Tout</option>
-              <option value="3m">3 derniers mois</option>
-              <option value="6m">6 derniers mois</option>
-              <option value="12m">12 derniers mois</option>
+              <option value="all">{t("history.periodOptions.all")}</option>
+              <option value="3m">{t("history.periodOptions.three")}</option>
+              <option value="6m">{t("history.periodOptions.six")}</option>
+              <option value="12m">{t("history.periodOptions.twelve")}</option>
             </select>
           </label>
           <button type="button" onClick={add} className="btn btn-primary self-start">
-            Enregistrer dans l'historique
+            {t("history.save")}
           </button>
         </div>
       </div>
 
       {items.length >= 60 && (
         <div className="no-print mb-3 rounded-md border border-amber-500/40 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-400/40 dark:bg-amber-900/30 dark:text-amber-200">
-          Capacité maximale atteinte. Le prochain enregistrement remplacera le plus ancien.
+          {t("history.maxWarning")}
         </div>
       )}
 
       {filteredItems.length === 0 ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400">Aucun enregistrement ne correspond à votre recherche.</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("history.empty")}</p>
       ) : (
-        <div className="relative history-timeline" role="list" aria-label="Historique des calculs enregistrés">
+        <div className="relative history-timeline" role="list" aria-label={t("history.listLabel")}>
           {filteredItems.map((item, index) => {
             const isLast = index === filteredItems.length - 1;
             const isExpanded = expanded.has(item.id);
             const monthLabel = toMonthLabel(item.dateISO);
             const fullLabel = toFullLabel(item.dateISO);
-            const noteValue = item.note || "(sans note)";
+            const noteValue = item.note || t("history.noNote");
 
             return (
               <article
@@ -263,21 +278,29 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-300">
                       <div>
-                        Dépôts — {item.result.partnerAName}: {euro(item.result.depositA)} / {item.result.partnerBName}: {euro(item.result.depositB)}
+                        {t("history.depositsSummary", {
+                          partnerA: item.result.partnerAName,
+                          partnerB: item.result.partnerBName,
+                          depositA: euro(item.result.depositA),
+                          depositB: euro(item.result.depositB),
+                        })}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Cash: {euro(item.result.cashNeeded)} · TR utilisés: {euro(item.result.usedTR)}
+                        {t("history.cashSummary", {
+                          cash: euro(item.result.cashNeeded),
+                          usedTr: euro(item.result.usedTR),
+                        })}
                       </div>
                     </div>
                   </header>
-                  <div className="no-print flex flex-wrap gap-2" aria-label={`Actions pour l'enregistrement du ${fullLabel}`}>
+                  <div className="no-print flex flex-wrap gap-2" aria-label={t("history.listActions", { label: fullLabel })}>
                     <button
                       type="button"
                       className="btn btn-primary"
                       onClick={() => onLoad(item)}
-                      aria-label={`Charger l'enregistrement du ${fullLabel}`}
+                      aria-label={t("history.loadAria", { label: fullLabel })}
                     >
-                      Charger
+                      {t("history.load")}
                     </button>
                     <button
                       type="button"
@@ -285,17 +308,17 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
                       onClick={() => toggleDetails(item.id)}
                       aria-expanded={isExpanded}
                       aria-controls={`history-details-${item.id}`}
-                      aria-label={`Afficher les détails de l'enregistrement du ${fullLabel}`}
+                      aria-label={t("history.detailsAria", { label: fullLabel })}
                     >
-                      Détails
+                      {t("history.details")}
                     </button>
                     <button
                       type="button"
                       className="btn btn-ghost"
                       onClick={() => del(item.id)}
-                      aria-label={`Supprimer l'enregistrement du ${fullLabel}`}
+                      aria-label={t("history.deleteAria", { label: fullLabel })}
                     >
-                      Supprimer
+                      {t("history.delete")}
                     </button>
                   </div>
                   <div
@@ -304,14 +327,17 @@ const HistoryComponent: React.ForwardRefRenderFunction<HistoryHandle, HistoryPro
                     className="rounded-md border border-gray-200 bg-white/60 p-3 text-sm text-gray-700 transition-all duration-200 dark:border-gray-800 dark:bg-gray-900/60 dark:text-gray-200"
                   >
                     <dl className="grid gap-2 sm:grid-cols-2">
-                      {INPUT_SUMMARY.map((meta) => {
+                      {inputSummary.map((meta) => {
                         const value = item.inputs[meta.key];
                         let display: string;
                         if ("type" in meta) {
                           if (meta.type === "bool") {
-                            display = value ? "Oui" : "Non";
+                            display = value ? t("history.boolYes") : t("history.boolNo");
                           } else {
-                            display = typeof value === "string" && value.trim() !== "" ? value : "(par défaut)";
+                            display =
+                              typeof value === "string" && value.trim() !== ""
+                                ? value
+                                : t("history.defaultValue");
                           }
                         } else {
                           const numeric = typeof value === "number" ? value : Number(value) || 0;

@@ -7,6 +7,11 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "i18next": ["src/vendor/i18next"],
+      "react-i18next": ["src/vendor/react-i18next"]
+    },
     "resolveJsonModule": true,
     "noEmit": true,
     "isolatedModules": true,

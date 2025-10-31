@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type CalculationInfoCardProps = {
   onRequestDetails: () => void;
@@ -7,6 +8,7 @@ type CalculationInfoCardProps = {
 const STORAGE_KEY = "calc-info-open";
 
 export const CalculationInfoCard: React.FC<CalculationInfoCardProps> = ({ onRequestDetails }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const contentId = useId();
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -44,7 +46,7 @@ export const CalculationInfoCard: React.FC<CalculationInfoCardProps> = ({ onRequ
   return (
     <section
       className="card border-blue-200/70 bg-blue-50/70 shadow-sm dark:border-blue-500/30 dark:bg-slate-900/40"
-      aria-label="Comprendre les modèles de calcul"
+      aria-label={t("calculationInfo.aria")}
     >
       <button
         type="button"
@@ -55,7 +57,7 @@ export const CalculationInfoCard: React.FC<CalculationInfoCardProps> = ({ onRequ
       >
         <span className="flex items-center gap-2 text-base font-semibold">
           <span aria-hidden="true">🧠</span>
-          Comprendre le calcul
+          {t("calculationInfo.toggle")}
         </span>
         <span aria-hidden="true" className={`text-lg transition-transform duration-300 ease-out ${open ? "-rotate-180" : "rotate-0"}`}>
           ▾
@@ -75,36 +77,31 @@ export const CalculationInfoCard: React.FC<CalculationInfoCardProps> = ({ onRequ
             tabIndex={-1}
             className="text-lg font-semibold text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 dark:text-blue-200"
           >
-            Comprendre les deux modèles
+            {t("calculationInfo.sectionTitle")}
           </h3>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">🎯 Objectif</h4>
-            <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">
-              Répartir les dépenses communes en respectant les moyens de chacun pour que l’effort ressenti reste comparable, sans
-              viser un partage strictement 50/50.
-            </p>
+            <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">{t("calculationInfo.objectiveTitle")}</h4>
+            <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">{t("calculationInfo.objectiveText")}</p>
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">⚖️ Deux modèles</h4>
+            <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">{t("calculationInfo.modelsTitle")}</h4>
             <div className="space-y-3">
               <div className="rounded-md border border-blue-200/60 bg-white/70 p-3 text-gray-700 shadow-sm dark:border-blue-500/30 dark:bg-slate-900/60 dark:text-gray-100">
-                <p className="font-semibold text-gray-900 dark:text-gray-50">⚖️ Modèle 1 — Proportionnel aux revenus (avec TR)</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-50">{t("calculationInfo.proportionalTitle")}</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                  <li>Calcule les moyens réels : salaires + tickets resto consommés.</li>
-                  <li>Attribue à chacun une part au prorata de ces moyens.</li>
-                  <li>Déduit les TR déjà utilisés avant de demander du cash.</li>
-                  <li>Ajuste le budget commun en incluant la part éligible TR.</li>
+                  {(t("calculationInfo.proportionalList") as string[]).map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
                 </ul>
               </div>
               <div className="rounded-md border border-blue-200/60 bg-white/70 p-3 text-gray-700 shadow-sm dark:border-blue-500/30 dark:bg-slate-900/60 dark:text-gray-100">
-                <p className="font-semibold text-gray-900 dark:text-gray-50">⚖️ Modèle 2 — Reste à vivre égal</p>
+                <p className="font-semibold text-gray-900 dark:text-gray-50">{t("calculationInfo.equalTitle")}</p>
                 <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
-                  <li>Fixe un objectif : même reste cash pour A et B après contribution.</li>
-                  <li>Répartit le dépôt nécessaire pour aligner ces restes.</li>
-                  <li>Intègre les TR déjà utilisés pour réduire l’effort demandé.</li>
-                  <li>Compense si l’un devrait contribuer négativement (borne à 0).</li>
+                  {(t("calculationInfo.equalList") as string[]).map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -112,23 +109,19 @@ export const CalculationInfoCard: React.FC<CalculationInfoCardProps> = ({ onRequ
 
           <div className="space-y-4">
             <div>
-              <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">🍽️ Tickets resto</h4>
-              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">
-                Les TR sont comptés comme contribution en nature sur les dépenses éligibles. Seule la part réellement consommée est prise en compte.
-              </p>
+              <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">{t("calculationInfo.trTitle")}</h4>
+              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">{t("calculationInfo.trText")}</p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">🎚️ Biais</h4>
-              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">
-                L’ajustement du prorata permet de déplacer légèrement la part de A ou B pour répondre à un inconfort ponctuel ou équilibrer des charges personnelles.
-              </p>
+              <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">{t("calculationInfo.biasTitle")}</h4>
+              <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200">{t("calculationInfo.biasText")}</p>
             </div>
             <div>
-              <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">🧩 Limites</h4>
+              <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-200">{t("calculationInfo.limitsTitle")}</h4>
               <ul className="list-disc space-y-1 pl-5 text-sm text-gray-700 dark:text-gray-200">
-                <li>Adapter le % de TR si tous ne sont pas dépensés pour les dépenses communes.</li>
-                <li>Surveiller la part du budget non éligible TR pour évaluer l’effort ressenti.</li>
-                <li>Prendre en compte les charges personnelles marquées si elles diffèrent beaucoup.</li>
+                {(t("calculationInfo.limitsList") as string[]).map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -143,7 +136,7 @@ export const CalculationInfoCard: React.FC<CalculationInfoCardProps> = ({ onRequ
                   onRequestDetails();
                 }}
               >
-                Voir les formules détaillées
+                {t("calculationInfo.detailsLink")}
               </a>
             </div>
           )}

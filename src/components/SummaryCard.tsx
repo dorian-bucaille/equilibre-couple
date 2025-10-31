@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { euro, pct } from "../lib/format";
 import type { Result, SplitMode } from "../lib/types";
 
@@ -134,28 +135,31 @@ export const SummaryCard: React.FC<{
   onSaveHistory?: () => void;
   onFocusNote?: () => void;
 }> = ({ r, partnerAName, partnerBName, mode, onSaveHistory, onFocusNote }) => {
+  const { t } = useTranslation();
   const [displayMode, setDisplayMode] = React.useState<DisplayMode>("percent");
   const isEqualLeftover = mode === "equal_leftover";
-  const modeAnnouncement = isEqualLeftover ? "Mode reste à vivre égal" : "Mode proportionnel";
+  const modeAnnouncement = isEqualLeftover
+    ? t("parameters.modes.equal_leftover.announcement")
+    : t("parameters.modes.proportional.announcement");
 
   const contributionSegments: Segment[] = [
     {
-      label: `Dépôt ${partnerAName}`,
+      label: t("summary.chart.deposit", { name: partnerAName }),
       amount: Math.max(r.depositD, 0),
       color: "var(--chart-a-deposit)",
     },
     {
-      label: `TR ${partnerAName}`,
+      label: t("summary.chart.tr", { name: partnerAName }),
       amount: Math.max(r.usedTRA, 0),
       color: "var(--chart-a-tr)",
     },
     {
-      label: `Dépôt ${partnerBName}`,
+      label: t("summary.chart.deposit", { name: partnerBName }),
       amount: Math.max(r.depositM, 0),
       color: "var(--chart-b-deposit)",
     },
     {
-      label: `TR ${partnerBName}`,
+      label: t("summary.chart.tr", { name: partnerBName }),
       amount: Math.max(r.usedTRB, 0),
       color: "var(--chart-b-tr)",
     },
@@ -166,43 +170,49 @@ export const SummaryCard: React.FC<{
   return (
     <div className="card space-y-6">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Résumé</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Aperçu instantané de la répartition et du niveau de contribution de chaque partenaire.
-        </p>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t("summary.title")}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("summary.description")}</p>
       </div>
       <div aria-live="polite" className="sr-only">
         {modeAnnouncement}
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryStat label={`Part ${partnerAName}`} value={pct(r.shareD_biased)} emphasis="large" />
-        <SummaryStat label={`Part ${partnerBName}`} value={pct(r.shareM_biased)} emphasis="large" />
-        <SummaryStat label={`Dépôt ${partnerAName}`} value={euro(r.depositD)} />
-        <SummaryStat label={`Dépôt ${partnerBName}`} value={euro(r.depositM)} />
+        <SummaryStat
+          label={t("summary.labels.share", { name: partnerAName })}
+          value={pct(r.shareD_biased)}
+          emphasis="large"
+        />
+        <SummaryStat
+          label={t("summary.labels.share", { name: partnerBName })}
+          value={pct(r.shareM_biased)}
+          emphasis="large"
+        />
+        <SummaryStat label={t("summary.labels.deposit", { name: partnerAName })} value={euro(r.depositD)} />
+        <SummaryStat label={t("summary.labels.deposit", { name: partnerBName })} value={euro(r.depositM)} />
       </div>
       {isEqualLeftover && (
         <div className="grid gap-4 sm:grid-cols-2">
-          <SummaryStat label={`Reste ${partnerAName}`} value={euro(r.leftoverA)} />
-          <SummaryStat label={`Reste ${partnerBName}`} value={euro(r.leftoverB)} />
+          <SummaryStat label={t("summary.labels.leftover", { name: partnerAName })} value={euro(r.leftoverA)} />
+          <SummaryStat label={t("summary.labels.leftover", { name: partnerBName })} value={euro(r.leftoverB)} />
         </div>
       )}
 
       <div className="h-px w-full bg-gradient-to-r from-transparent via-gray-200 to-transparent dark:via-gray-700" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryStat label="Cash total à déposer" value={euro(r.cashNeeded)} />
-        <SummaryStat label="TR utilisés (V)" value={euro(r.V)} />
-        <SummaryStat label="Pot total (M)" value={euro(r.potTotal)} />
+        <SummaryStat label={t("summary.labels.totalCash")} value={euro(r.cashNeeded)} />
+        <SummaryStat label={t("summary.labels.usedTr")} value={euro(r.V)} />
+        <SummaryStat label={t("summary.labels.totalPot")} value={euro(r.potTotal)} />
         <SummaryStat
-          label="Avertissements"
+          label={t("summary.labels.warnings")}
           value={String(warningsCount)}
           tone={warningsCount > 0 ? "alert" : "default"}
         />
       </div>
 
       <Chart
-        title="Répartition des contributions"
-        centerLabel={displayMode === "percent" ? "Total (%)" : "Total (€)"}
+        title={t("summary.chart.title")}
+        centerLabel={displayMode === "percent" ? t("summary.chart.centerPercent") : t("summary.chart.centerAmount")}
         displayMode={displayMode}
         segments={contributionSegments}
         actions={
@@ -237,20 +247,18 @@ export const SummaryCard: React.FC<{
       {(onSaveHistory || onFocusNote) && (
         <div className="no-print flex flex-col gap-3 rounded-2xl border border-gray-200/80 bg-white/70 p-4 shadow-sm dark:border-gray-700/60 dark:bg-gray-900/40 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Sauvegarder cette configuration</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Les enregistrements sont stockés localement sur cet appareil.
-            </p>
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{t("summary.saveBlock.title")}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{t("summary.saveBlock.description")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             {onFocusNote && (
               <button type="button" className="btn btn-ghost" onClick={onFocusNote}>
-                Ajouter une note
+                {t("summary.saveBlock.addNote")}
               </button>
             )}
             {onSaveHistory && (
               <button type="button" className="btn btn-primary" onClick={onSaveHistory}>
-                Enregistrer dans l'historique
+                {t("summary.saveBlock.save")}
               </button>
             )}
           </div>

@@ -1,4 +1,5 @@
 import { calculate } from "./calc";
+import i18n from "./i18n";
 import type { Inputs } from "./types";
 
 const KEY_STATE = "eqc_state_v1";
@@ -50,8 +51,10 @@ function upgradeHistoryItem(item: LegacyHistoryItem): HistoryItem {
   if (item.result) return item as HistoryItem;
 
   const computed = calculate(item.inputs);
-  const partnerAName = item.inputs.partnerAName?.trim() || "Partenaire A";
-  const partnerBName = item.inputs.partnerBName?.trim() || "Partenaire B";
+  const partnerAName =
+    item.inputs.partnerAName?.trim() || i18n.t("parameters.partnerPlaceholder", { label: "A" });
+  const partnerBName =
+    item.inputs.partnerBName?.trim() || i18n.t("parameters.partnerPlaceholder", { label: "B" });
 
   return {
     ...item,

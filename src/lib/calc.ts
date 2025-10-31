@@ -1,4 +1,5 @@
 import { clamp /*, round2 */ } from "./format"; // ⟵ on n'utilise plus round2 ici
+import i18n from "./i18n";
 import type { Inputs, Result, SplitMode } from "./types";
 
 // Arrondi sûr à 2 décimales (toujours un number, jamais NaN)
@@ -23,8 +24,8 @@ export function calculate(inputs: Inputs): Result {
   const mode: SplitMode = requestedMode === "equal_leftover" ? "equal_leftover" : "proportional";
   const biasPtsRaw = toFinite(inputs.biasPts);
   const biasPts = mode === "equal_leftover" ? 0 : biasPtsRaw;
-  const partnerAName = inputs.partnerAName?.trim() || "Partenaire A";
-  const partnerBName = inputs.partnerBName?.trim() || "Partenaire B";
+  const partnerAName = inputs.partnerAName?.trim() || i18n.t("parameters.partnerPlaceholder", { label: "A" });
+  const partnerBName = inputs.partnerBName?.trim() || i18n.t("parameters.partnerPlaceholder", { label: "B" });
 
   const trPctClamped = clamp(trPct, 0, 100) / 100;
   const effectiveTRA = Math.max(0, a2) * trPctClamped;
@@ -76,22 +77,55 @@ export function calculate(inputs: Inputs): Result {
 
   const pushCommonSteps = () => {
     steps.push(
-      `TR effectifs — ${partnerAName}: ${r2(effectiveTRA)} €, ${partnerBName}: ${r2(effectiveTRB)} € (total ${r2(effectiveTR)} €)`
+      i18n.t("calc.steps.effectiveTr", {
+        partnerAName,
+        partnerBName,
+        valueA: r2(effectiveTRA),
+        valueB: r2(effectiveTRB),
+        total: r2(effectiveTR),
+      }),
     );
     steps.push(
       advanced
-        ? `TR utilisés (après plafond E) — ${partnerAName}: ${r2(usedTRA)} €, ${partnerBName}: ${r2(usedTRB)} € (total ${r2(V)} €)`
-        : `TR utilisés — ${partnerAName}: ${r2(effectiveTRA)} €, ${partnerBName}: ${r2(effectiveTRB)} € (total ${r2(V)} €)`
+        ? i18n.t("calc.steps.usedTrCapped", {
+            partnerAName,
+            partnerBName,
+            valueA: r2(usedTRA),
+            valueB: r2(usedTRB),
+            total: r2(V),
+          })
+        : i18n.t("calc.steps.usedTr", {
+            partnerAName,
+            partnerBName,
+            valueA: r2(effectiveTRA),
+            valueB: r2(effectiveTRB),
+            total: r2(V),
+          }),
     );
     steps.push(
       advanced
-        ? `Pot total M = m + E = ${r2(m)} + ${r2(eligibleTR)} = ${r2(potTotal)} €`
-        : `Pot total équivalent = m + V = ${r2(m)} + ${r2(V)} = ${r2(potTotal)} €`
+        ? i18n.t("calc.steps.totalPotAdvanced", {
+            m: r2(m),
+            eligible: r2(eligibleTR),
+            total: r2(potTotal),
+          })
+        : i18n.t("calc.steps.totalPot", {
+            m: r2(m),
+            v: r2(V),
+            total: r2(potTotal),
+          }),
     );
+    const extra = r2(Math.max(0, eligibleTR - V));
     steps.push(
       advanced
-        ? `Cash à déposer = m + max(0, E - V) = ${r2(m)} + ${r2(Math.max(0, eligibleTR - V))} = ${r2(cashNeededRounded)} €`
-        : `Cash à déposer = m = ${r2(cashNeededRounded)} €`
+        ? i18n.t("calc.steps.cashNeededAdvanced", {
+            m: r2(m),
+            extra,
+            cash: r2(cashNeededRounded),
+          })
+        : i18n.t("calc.steps.cashNeeded", {
+            cash: r2(cashNeededRounded),
+          }),
     );
   };
 
@@ -151,26 +185,61 @@ export function calculate(inputs: Inputs): Result {
     leftoverB = r2(SB - depositM);
 
     if (denom === 0) {
-      warnings.push("Somme des revenus pondérés nulle — parts fixées à 50/50 par sécurité.");
+      warnings.push(i18n.t("calc.warnings.zeroWeighted"));
     }
     if (contribEqDRaw - usedTRA < 0) {
-      warnings.push(`Le dépôt de ${partnerAName} est borné à 0 (sa part est couverte par les tickets resto).`);
+      warnings.push(i18n.t("calc.warnings.depositBoundedA", { name: partnerAName }));
     }
     if (contribEqMRaw - usedTRB < 0) {
-      warnings.push(`Le dépôt de ${partnerBName} est borné à 0 (sa part est couverte par les tickets resto).`);
+      warnings.push(i18n.t("calc.warnings.depositBoundedB", { name: partnerBName }));
     }
 
+    const shareA = (shareD_raw * 100).toFixed(1);
+    const shareB = ((1 - shareD_raw) * 100).toFixed(1);
+    const biasedShareA = (shareD_biased * 100).toFixed(1);
+    const biasedShareB = (shareM_biased * 100).toFixed(1);
+    const biasDisplay = `${biasPts >= 0 ? "+" : ""}${biasPts.toFixed(1)}`;
+    const biasDirection =
+      biasPts === 0
+        ? i18n.t("calc.steps.biasDirection.neutral")
+        : biasPts > 0
+          ? i18n.t("calc.steps.biasDirection.favorB", { name: partnerBName })
+          : i18n.t("calc.steps.biasDirection.favorA", { name: partnerAName });
+
     steps.push(
-      `Parts (avant biais): ${partnerAName}=${(shareD_raw * 100).toFixed(1)}% / ${partnerBName}=${((1 - shareD_raw) * 100).toFixed(1)}%`
+      i18n.t("calc.steps.sharesRaw", {
+        partnerAName,
+        partnerBName,
+        shareA,
+        shareB,
+      }),
     );
     steps.push(
-      `Biais ${(biasPts >= 0 ? "+" : "") + biasPts.toFixed(1)} pts (${biasPts === 0 ? "neutre" : biasPts > 0 ? `favorise ${partnerBName}` : `favorise ${partnerAName}`}) => ${partnerAName}=${(shareD_biased * 100).toFixed(1)}% / ${partnerBName}=${(shareM_biased * 100).toFixed(1)}%`
+      i18n.t("calc.steps.bias", {
+        bias: biasDisplay,
+        direction: biasDirection,
+        partnerAName,
+        partnerBName,
+        shareA: biasedShareA,
+        shareB: biasedShareB,
+      }),
     );
     steps.push(
-      `Contribution équivalente: ${partnerAName}=${r2(contribEqDRaw)} €, ${partnerBName}=${r2(contribEqMRaw)} €`
+      i18n.t("calc.steps.contributionEquivalent", {
+        partnerAName,
+        partnerBName,
+        valueA: r2(contribEqDRaw),
+        valueB: r2(contribEqMRaw),
+      }),
     );
     steps.push(
-      `Dépôts cash: ${partnerAName}=${r2(depositD)} €, ${partnerBName}=${r2(depositM)} € (somme cash=${r2(depositD + depositM)} €)`
+      i18n.t("calc.steps.cashDeposits", {
+        partnerAName,
+        partnerBName,
+        valueA: r2(depositD),
+        valueB: r2(depositM),
+        total: r2(depositD + depositM),
+      }),
     );
   } else {
     let depositDRaw = (cashNeeded + (SA - SB)) / 2;
@@ -212,42 +281,74 @@ export function calculate(inputs: Inputs): Result {
     shareM_biased = 1 - shareD_biased;
 
     if (depositD === 0 && SA < SB) {
-      warnings.push("Dépôt A borné à 0 (reste égalisé).");
+      warnings.push(i18n.t("calc.warnings.equalBoundedA"));
     }
     if (depositM === 0 && SB < SA) {
-      warnings.push("Dépôt B borné à 0 (reste égalisé).");
+      warnings.push(i18n.t("calc.warnings.equalBoundedB"));
     }
 
-    steps.push("Mode reste à vivre égal : chacun conserve le même reste cash.");
+    steps.push(i18n.t("calc.steps.equalModeIntro"));
     steps.push(
-      `Égalité du reste cash: ${r2(SA)} - dépôt ${partnerAName} = ${r2(SB)} - dépôt ${partnerBName}`
+      i18n.t("calc.steps.equalEquation", {
+        sa: r2(SA),
+        sb: r2(SB),
+        partnerAName,
+        partnerBName,
+      }),
     );
     steps.push(
-      `Dépôt ${partnerAName} = (cashNeeded + (${r2(SA)} - ${r2(SB)})) / 2 = ${r2(depositD)} €`
+      i18n.t("calc.steps.equalDepositA", {
+        partnerAName,
+        sa: r2(SA),
+        sb: r2(SB),
+        depositA: r2(depositD),
+      }),
     );
     steps.push(
-      `Dépôt ${partnerBName} = cashNeeded - dépôt ${partnerAName} = ${r2(cashNeededRounded)} - ${r2(depositD)} = ${r2(depositM)} €`
+      i18n.t("calc.steps.equalDepositB", {
+        partnerAName,
+        partnerBName,
+        cashNeeded: r2(cashNeededRounded),
+        depositA: r2(depositD),
+        depositB: r2(depositM),
+      }),
     );
     if (boundedA) {
-      steps.push(`Dépôt ${partnerAName} borné à 0 pour éviter un dépôt négatif.`);
+      steps.push(i18n.t("calc.steps.equalBoundedA", { partnerAName }));
     }
     if (boundedB) {
-      steps.push(`Dépôt ${partnerBName} borné à 0 pour éviter un dépôt négatif.`);
+      steps.push(i18n.t("calc.steps.equalBoundedB", { partnerBName }));
     }
     steps.push(
-      `Contribution équivalente (cash + TR): ${partnerAName}=${r2(contribEqDRaw)} €, ${partnerBName}=${r2(contribEqMRaw)} €`
+      i18n.t("calc.steps.contributionEqual", {
+        partnerAName,
+        partnerBName,
+        valueA: r2(contribEqDRaw),
+        valueB: r2(contribEqMRaw),
+      }),
     );
     steps.push(
-      `Restes cash égalisés: ${partnerAName}=${r2(leftoverA)} €, ${partnerBName}=${r2(leftoverB)} €`
+      i18n.t("calc.steps.leftovers", {
+        partnerAName,
+        partnerBName,
+        valueA: r2(leftoverA),
+        valueB: r2(leftoverB),
+      }),
     );
     steps.push(
-      `Dépôts cash: ${partnerAName}=${r2(depositD)} €, ${partnerBName}=${r2(depositM)} € (somme cash=${r2(depositD + depositM)} €)`
+      i18n.t("calc.steps.cashDeposits", {
+        partnerAName,
+        partnerBName,
+        valueA: r2(depositD),
+        valueB: r2(depositM),
+        total: r2(depositD + depositM),
+      }),
     );
   }
 
   if (advanced && effectiveTR > eligibleTR) {
     warnings.push(
-      `TR non utilisés intégralement: ${r2(effectiveTR - eligibleTR)} € non consommés (E < TR).`
+      i18n.t("calc.warnings.trNotFullyUsed", { amount: r2(effectiveTR - eligibleTR) })
     );
   }
 
