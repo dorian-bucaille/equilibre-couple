@@ -18,18 +18,17 @@ export const FairnessInfoCard: React.FC = () => {
               Pourquoi c’est équitable
             </h2>
             <p className="text-gray-700 dark:text-gray-200">
-              Le calcul vise une répartition proportionnelle aux ressources réelles de chacun : l’effort ressenti reste comparable,
-              même si les montants diffèrent.
+              Ici, l’équité signifie « chacun contribue selon ses moyens » : on compare les ressources réelles plutôt que de viser un simple 50/50.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-white/70 px-2 py-0.5 text-xs font-medium text-blue-700 shadow-sm dark:bg-blue-900/70 dark:text-blue-200">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-medium">
+            <span className="rounded-full bg-white/70 px-2 py-0.5 text-blue-700 shadow-sm dark:bg-blue-900/70 dark:text-blue-200">
               Revenus nets
             </span>
-            <span className="rounded-full bg-white/70 px-2 py-0.5 text-xs font-medium text-blue-700 shadow-sm dark:bg-blue-900/70 dark:text-blue-200">
-              Tickets resto utilisés
+            <span className="rounded-full bg-white/70 px-2 py-0.5 text-blue-700 shadow-sm dark:bg-blue-900/70 dark:text-blue-200">
+              Tickets resto
             </span>
-            <span className="rounded-full bg-white/70 px-2 py-0.5 text-xs font-medium text-blue-700 shadow-sm dark:bg-blue-900/70 dark:text-blue-200">
+            <span className="rounded-full bg-white/70 px-2 py-0.5 text-blue-700 shadow-sm dark:bg-blue-900/70 dark:text-blue-200">
               Budget commun
             </span>
           </div>
@@ -55,23 +54,24 @@ export const FairnessInfoCard: React.FC = () => {
         }`}
         aria-hidden={!expanded}
       >
-        <div className="rounded-lg border border-blue-200/60 bg-white/60 p-3 text-sm dark:border-blue-800/60 dark:bg-blue-950/40">
+        <div className="rounded-lg border border-blue-200/60 bg-white/60 p-3 text-sm leading-relaxed dark:border-blue-800/60 dark:bg-blue-950/40">
           <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-blue-800 dark:text-blue-200">
             <span aria-hidden="true">🧠</span>
             Comprendre le calcul
           </h3>
           <p>
-            Le modèle additionne les revenus nets et la part de tickets restaurant réellement dépensée pour les dépenses communes. La
-            contribution de chacun est ensuite calculée au prorata de cette enveloppe partagée.
+            Le modèle additionne revenus, tickets resto consommés et dépenses communes à financer. On calcule ensuite la part de chacun dans ce total afin que la contribution suive le même pourcentage.
           </p>
-          <ol className="ml-5 list-decimal space-y-1 pt-2">
-            <li>On additionne toutes les ressources disponibles du couple.</li>
-            <li>On calcule la part relative de chaque partenaire dans ce total.</li>
-            <li>Chacun finance le budget commun à hauteur de sa part, moins les tickets resto déjà utilisés.</li>
+          <ol className="ml-5 list-decimal space-y-1 pt-3">
+            <li>On totalise toutes les ressources mobilisées par le couple.</li>
+            <li>On mesure la part relative de chaque partenaire dans cette enveloppe.</li>
+            <li>On applique ce pourcentage au budget commun et l’on déduit les tickets resto déjà utilisés.</li>
           </ol>
-          <p className="pt-2">
-            Si les tickets resto couvrent déjà une partie des dépenses, la contribution en espèces du partenaire concerné est réduite d’autant. On
-            vise une équité perçue, pas une symétrie parfaite : libre à vous d’ajuster selon vos projets ou charges personnelles.
+          <div className="mt-3 rounded-md border border-blue-100/80 bg-blue-100/60 p-2 text-[0.85rem] text-blue-900 shadow-sm dark:border-blue-800/40 dark:bg-blue-900/30 dark:text-blue-100">
+            Les tickets resto couvrant déjà certaines courses sont considérés comme une contribution en nature : ils réduisent d’autant le virement à faire.
+          </div>
+          <p className="pt-3">
+            Résultat : l’effort ressenti reste comparable, et vous pouvez ajuster ensemble si vous préférez équilibrer les restes à vivre ou tenir compte d’autres projets.
           </p>
         </div>
       </div>
