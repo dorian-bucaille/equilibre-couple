@@ -16,3 +16,5 @@ jobs:
       - run: npm run build
       - name: Run Lighthouse CI
         run: npm run lighthouse:ci
+        env:
+          LHCI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
