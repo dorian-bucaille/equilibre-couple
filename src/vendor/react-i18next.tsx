@@ -1,11 +1,6 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+
+/* eslint-disable react-refresh/only-export-components */
 
 import type { I18n, TFunction } from "i18next";
 
@@ -30,11 +25,11 @@ interface I18nextProviderProps {
 }
 
 export function I18nextProvider({ i18n, children }: I18nextProviderProps) {
-  const [language, setLanguage] = useState(() => i18n.language);
+  const [, forceRender] = useState({});
 
   useEffect(() => {
-    const handler = (lng: string) => {
-      setLanguage(lng);
+    const handler = () => {
+      forceRender({});
     };
     i18n.on("languageChanged", handler);
     return () => {
@@ -42,13 +37,10 @@ export function I18nextProvider({ i18n, children }: I18nextProviderProps) {
     };
   }, [i18n]);
 
-  const value = useMemo<ProviderValue>(
-    () => ({
-      i18n,
-      t: i18n.t.bind(i18n),
-    }),
-    [i18n, language],
-  );
+  const value: ProviderValue = {
+    i18n,
+    t: i18n.t.bind(i18n),
+  };
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
@@ -61,28 +53,25 @@ export interface UseTranslationResponse {
 export function useTranslation(): UseTranslationResponse {
   const context = useContext(I18nContext);
   const fallbackInstance = attachedI18n;
-  const [language, setLanguage] = useState(() => fallbackInstance?.language ?? "");
+  const [, forceRender] = useState({});
 
   useEffect(() => {
     if (!fallbackInstance || context) {
       return;
     }
-    const handler = (lng: string) => setLanguage(lng);
+    const handler = () => forceRender({});
     fallbackInstance.on("languageChanged", handler);
     return () => {
       fallbackInstance.off("languageChanged", handler);
     };
   }, [context, fallbackInstance]);
 
-  const fallbackValue = useMemo<ProviderValue | null>(() => {
-    if (!fallbackInstance) {
-      return null;
-    }
-    return {
-      i18n: fallbackInstance,
-      t: fallbackInstance.t.bind(fallbackInstance),
-    };
-  }, [fallbackInstance, language]);
+  const fallbackValue: ProviderValue | null = fallbackInstance
+    ? {
+        i18n: fallbackInstance,
+        t: fallbackInstance.t.bind(fallbackInstance),
+      }
+    : null;
 
   if (context) {
     return context;

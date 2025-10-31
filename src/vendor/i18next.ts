@@ -3,7 +3,7 @@ export type ResourceValue = Primitive | ResourceValue[] | ResourceRecord;
 export type ResourceRecord = Record<string, ResourceValue>;
 export type Resource = Record<string, Record<string, ResourceValue>>;
 
-export type TFunction = (key: string, options?: Record<string, unknown>) => any;
+export type TFunction = (key: string, options?: Record<string, unknown>) => ResourceValue;
 
 export interface InitOptions {
   resources: Resource;
