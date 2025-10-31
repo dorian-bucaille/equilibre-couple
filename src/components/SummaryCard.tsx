@@ -91,27 +91,31 @@ const Chart: React.FC<{
   );
 };
 
-export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
+export const SummaryCard: React.FC<{
+  r: Result;
+  partnerAName: string;
+  partnerBName: string;
+}> = ({ r, partnerAName, partnerBName }) => {
   const [displayMode, setDisplayMode] = React.useState<DisplayMode>("percent");
 
   const contributionSegments: Segment[] = [
     {
-      label: "Dépôt partenaire A",
+      label: `Dépôt ${partnerAName}`,
       amount: Math.max(r.depositD, 0),
       color: "var(--chart-a-deposit)",
     },
     {
-      label: "TR partenaire A",
+      label: `TR ${partnerAName}`,
       amount: Math.max(r.usedTRA, 0),
       color: "var(--chart-a-tr)",
     },
     {
-      label: "Dépôt partenaire B",
+      label: `Dépôt ${partnerBName}`,
       amount: Math.max(r.depositM, 0),
       color: "var(--chart-b-deposit)",
     },
     {
-      label: "TR partenaire B",
+      label: `TR ${partnerBName}`,
       amount: Math.max(r.usedTRB, 0),
       color: "var(--chart-b-tr)",
     },
@@ -122,19 +126,19 @@ export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
       <h2 className="text-lg font-semibold mb-2">Résumé</h2>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div>
-          <div className="text-sm text-gray-500">Part partenaire A</div>
+          <div className="text-sm text-gray-500">Part {partnerAName}</div>
           <div className="text-xl">{pct(r.shareD_biased)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-500">Part partenaire B</div>
+          <div className="text-sm text-gray-500">Part {partnerBName}</div>
           <div className="text-xl">{pct(r.shareM_biased)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-500">Dépôt partenaire A</div>
+          <div className="text-sm text-gray-500">Dépôt {partnerAName}</div>
           <div className="text-xl">{euro(r.depositD)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-500">Dépôt partenaire B</div>
+          <div className="text-sm text-gray-500">Dépôt {partnerBName}</div>
           <div className="text-xl">{euro(r.depositM)}</div>
         </div>
       </div>

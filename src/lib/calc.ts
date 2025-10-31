@@ -20,6 +20,8 @@ export function calculate(inputs: Inputs): Result {
   const advanced = Boolean(inputs.advanced);
   const E = toFinite(inputs.E);
   const biasPts = toFinite(inputs.biasPts);
+  const partnerAName = inputs.partnerAName?.trim() || "Partenaire A";
+  const partnerBName = inputs.partnerBName?.trim() || "Partenaire B";
 
   const trPctClamped = clamp(trPct, 0, 100) / 100;
   const effectiveTRA = Math.max(0, a2) * trPctClamped;
@@ -118,27 +120,27 @@ export function calculate(inputs: Inputs): Result {
     );
   }
   if (contribEqD - usedTRA < 0) {
-    warnings.push("Dépôt du partenaire A borné à 0 (sa part est couverte par les tickets resto).");
+    warnings.push(`Le dépôt de ${partnerAName} est borné à 0 (sa part est couverte par les tickets resto).`);
   }
   if (contribEqM - usedTRB < 0) {
-    warnings.push("Dépôt du partenaire B borné à 0 (sa part est couverte par les tickets resto).");
+    warnings.push(`Le dépôt de ${partnerBName} est borné à 0 (sa part est couverte par les tickets resto).`);
   }
 
   steps.push(
-  `TR effectifs — A: ${r2(effectiveTRA)} €, B: ${r2(effectiveTRB)} € (total ${r2(effectiveTR)} €)`,
+  `TR effectifs — ${partnerAName}: ${r2(effectiveTRA)} €, ${partnerBName}: ${r2(effectiveTRB)} € (total ${r2(effectiveTR)} €)`,
   advanced
-    ? `TR utilisés (après plafond E) — A: ${r2(usedTRA)} €, B: ${r2(usedTRB)} € (total ${r2(V)} €)`
-    : `TR utilisés — A: ${r2(effectiveTRA)} €, B: ${r2(effectiveTRB)} € (total ${r2(V)} €)`,
+    ? `TR utilisés (après plafond E) — ${partnerAName}: ${r2(usedTRA)} €, ${partnerBName}: ${r2(usedTRB)} € (total ${r2(V)} €)`
+    : `TR utilisés — ${partnerAName}: ${r2(effectiveTRA)} €, ${partnerBName}: ${r2(effectiveTRB)} € (total ${r2(V)} €)`,
   advanced
     ? `Pot total M = m + E = ${r2(m)} + ${r2(eligibleTR)} = ${r2(potTotal)} €`
     : `Pot total équivalent = m + V = ${r2(m)} + ${r2(V)} = ${r2(potTotal)} €`,
   advanced
     ? `Cash à déposer = m + max(0, E - V) = ${r2(m)} + ${r2(Math.max(0, eligibleTR - V))} = ${r2(cashNeededRounded)} €`
     : `Cash à déposer = m = ${r2(cashNeededRounded)} €`,
-  `Parts (avant biais): D=${(shareD_raw * 100).toFixed(1)}% / M=${((1 - shareD_raw) * 100).toFixed(1)}%`,
-  `Biais ${(biasPts >= 0 ? "+" : "") + biasPts.toFixed(1)} pts (${biasPts === 0 ? "neutre" : biasPts > 0 ? "favorise B" : "favorise A"}) => D=${(shareD_biased * 100).toFixed(1)}% / M=${(shareM_biased * 100).toFixed(1)}%`,
-  `Contribution équivalente: D=${r2(contribEqD)} €, M=${r2(contribEqM)} €`,
-  `Dépôts cash: D=${r2(depositD)} €, M=${r2(depositM)} € (somme cash=${r2(depositD + depositM)} €)`
+  `Parts (avant biais): ${partnerAName}=${(shareD_raw * 100).toFixed(1)}% / ${partnerBName}=${((1 - shareD_raw) * 100).toFixed(1)}%`,
+  `Biais ${(biasPts >= 0 ? "+" : "") + biasPts.toFixed(1)} pts (${biasPts === 0 ? "neutre" : biasPts > 0 ? `favorise ${partnerBName}` : `favorise ${partnerAName}`}) => ${partnerAName}=${(shareD_biased * 100).toFixed(1)}% / ${partnerBName}=${(shareM_biased * 100).toFixed(1)}%`,
+  `Contribution équivalente: ${partnerAName}=${r2(contribEqD)} €, ${partnerBName}=${r2(contribEqM)} €`,
+  `Dépôts cash: ${partnerAName}=${r2(depositD)} €, ${partnerBName}=${r2(depositM)} € (somme cash=${r2(depositD + depositM)} €)`
 );
 
   return {
