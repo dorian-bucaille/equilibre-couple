@@ -33,7 +33,11 @@ export default [
         URLSearchParams: true,
         location: true,
         navigator: true,
-        alert: true
+        alert: true,
+        HTMLDivElement: true,
+        KeyboardEvent: true,
+        MouseEvent: true,
+        Node: true,
       },
     },
     plugins: {
