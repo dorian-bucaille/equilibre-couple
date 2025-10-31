@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { calculate } from "./lib/calc";
 import { euro } from "./lib/format";
 import type { Inputs } from "./lib/types";
@@ -57,6 +57,7 @@ export default function App() {
     const merged = parseQuery(loaded);
     return merged;
   });
+  const biasHighlight = useHighlightOnChange(inputs.biasPts);
 
   useEffect(() => {
     saveState(inputs);
@@ -75,7 +76,7 @@ export default function App() {
   const printPDF = () => window.print();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5 px-4 py-6 sm:p-6">
+    <div className="max-w-3xl mx-auto space-y-5 px-4 py-6 sm:p-6 transition-colors duration-300 ease-out">
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-center text-2xl font-bold md:text-left">
           Équilibre couple — calculateur
@@ -176,14 +177,24 @@ export default function App() {
             <label className="flex flex-col gap-1 sm:col-span-2">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <span className="font-medium">Ajustement du prorata (favoriser A ou B)</span>
-                <span className="text-sm text-gray-500 sm:text-right">
-                  {inputs.biasPts === 0
-                    ? "Neutre"
-                    : inputs.biasPts > 0
-                    ? `Favorise B (+${inputs.biasPts.toFixed(1)} pts)`
-                    : `Favorise A (${inputs.biasPts.toFixed(1)} pts)`}
+                <span
+                  className={`inline-block text-sm transition-all duration-200 ease-out sm:text-right ${
+                    biasHighlight
+                      ? "text-blue-600 dark:text-blue-300 opacity-100 -translate-y-1"
+                      : "text-gray-500 dark:text-gray-400 opacity-80 translate-y-0"
+                  }`}
+                >
+                  {formatBiasSummary(inputs.biasPts)}
                 </span>
-                <span className="text-sm text-gray-500">+{inputs.biasPts.toFixed(1)} points pour le partenaire A</span>
+                <span
+                  className={`text-sm transition-all duration-200 ease-out ${
+                    biasHighlight
+                      ? "text-blue-600 dark:text-blue-300 opacity-100"
+                      : "text-gray-500 dark:text-gray-400 opacity-80"
+                  }`}
+                >
+                  {formatBiasForPartnerA(inputs.biasPts)}
+                </span>
               </div>
               <input
                 type="range"
@@ -193,6 +204,9 @@ export default function App() {
                 value={inputs.biasPts}
                 onChange={(e) => setInputs({ ...inputs, biasPts: parseFloat(e.target.value) })}
                 aria-label="Ajustement du prorata (A ↔ B)"
+                className={`w-full accent-blue-600 transition-transform duration-200 ease-out ${
+                  biasHighlight ? "scale-[1.02]" : "scale-100"
+                }`}
               />
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Favoriser A</span>
@@ -240,7 +254,9 @@ function ThemeToggle() {
 
   return (
     <button
-      className="btn btn-ghost"
+      className={`btn btn-ghost transition-transform duration-300 ease-out ${
+        dark ? "rotate-0" : "-rotate-12"
+      }`}
       onClick={() => setDark((d) => !d)}
       aria-pressed={dark}
       aria-label="Basculer mode sombre"
@@ -248,4 +264,35 @@ function ThemeToggle() {
       {dark ? "🌙" : "☀️"}
     </button>
   );
+}
+
+function useHighlightOnChange(value: number, duration = 250) {
+  const [highlight, setHighlight] = useState(false);
+  const firstRender = useRef(true);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+
+    setHighlight(true);
+    const timeout = window.setTimeout(() => setHighlight(false), duration);
+    return () => window.clearTimeout(timeout);
+  }, [value, duration]);
+
+  return highlight;
+}
+
+function formatBiasSummary(value: number) {
+  const normalized = Math.abs(value) < 1e-6 ? 0 : value;
+  if (normalized === 0) return "Neutre";
+  if (normalized > 0) return `Favorise B (+${normalized.toFixed(1)} pts)`;
+  return `Favorise A (${normalized.toFixed(1)} pts)`;
+}
+
+function formatBiasForPartnerA(value: number) {
+  const normalized = Math.abs(value) < 1e-6 ? 0 : value;
+  const sign = normalized > 0 ? "+" : normalized < 0 ? "" : "+";
+  return `${sign}${normalized.toFixed(1)} points pour le partenaire A`;
 }
