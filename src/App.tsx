@@ -80,6 +80,10 @@ export default function App() {
   });
   const [lastLoadedInputs, setLastLoadedInputs] = useState<Inputs>(inputs);
   const [ariaMessage, setAriaMessage] = useState("");
+  const [copyTooltip, setCopyTooltip] = useState<
+    { message: string; tone: "success" | "error" } | null
+  >(null);
+  const copyTooltipTimeout = useRef<ReturnType<typeof setTimeout>>();
   const historyRef = useRef<HistoryHandle>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const detailsRef = useRef<DetailsCardHandle>(null);
@@ -101,10 +105,34 @@ export default function App() {
 
   const result = useMemo(() => calculate(inputs), [inputs]);
 
+  useEffect(() => {
+    return () => {
+      if (copyTooltipTimeout.current) {
+        clearTimeout(copyTooltipTimeout.current);
+      }
+    };
+  }, []);
+
   const copyLink = async () => {
     const url = toQuery(inputs);
-    await navigator.clipboard.writeText(url);
-    alert("Lien copié dans le presse-papiers.");
+    try {
+      await navigator.clipboard.writeText(url);
+      const message = "Lien copié dans le presse-papiers.";
+      setAriaMessage(message);
+      setCopyTooltip({ message, tone: "success" });
+    } catch (error) {
+      const message = "Impossible de copier le lien automatiquement.";
+      setAriaMessage(message);
+      setCopyTooltip({ message, tone: "error" });
+    }
+
+    if (copyTooltipTimeout.current) {
+      clearTimeout(copyTooltipTimeout.current);
+    }
+
+    copyTooltipTimeout.current = setTimeout(() => {
+      setCopyTooltip(null);
+    }, 2400);
   };
 
   const reset = () => {
@@ -190,9 +218,21 @@ export default function App() {
                 >
                   GitHub
                 </a>
-                <button onClick={copyLink} className="btn btn-ghost">
-                  Copier le lien
-                </button>
+                <div className="relative">
+                  <button onClick={copyLink} className="btn btn-ghost">
+                    Copier le lien
+                  </button>
+                  {copyTooltip ? (
+                    <div className="pointer-events-none absolute inset-x-0 top-full mt-2 flex justify-center">
+                      <span
+                        role="status"
+                        className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium shadow-lg ring-1 ring-black/5 ${copyTooltip.tone === "success" ? "bg-emerald-600 text-white" : "bg-rose-600 text-white"}`}
+                      >
+                        {copyTooltip.message}
+                      </span>
+                    </div>
+                  ) : null}
+                </div>
                 <button onClick={printPDF} className="btn btn-ghost">
                   Imprimer / PDF
                 </button>
