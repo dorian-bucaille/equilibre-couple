@@ -93,6 +93,7 @@ export default function App() {
   const partnerAName = inputs.partnerAName.trim() || "Partenaire A";
   const partnerBName = inputs.partnerBName.trim() || "Partenaire B";
   const biasDisabled = inputs.mode === "equal_leftover";
+  const advancedCollapsed = !inputs.advanced;
 
   useEffect(() => {
     saveState(inputs);
@@ -353,7 +354,7 @@ export default function App() {
                     ref={advancedRef}
                     className="overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out"
                     style={{ maxHeight: "0px", opacity: 0, transform: "translateY(-0.5rem)" }}
-                    aria-hidden={!inputs.advanced}
+                    aria-hidden={advancedCollapsed}
                   >
                     <div className="mt-4 grid gap-4 sm:grid-cols-2">
                       <InputField
@@ -366,6 +367,7 @@ export default function App() {
                         max={100}
                         step={1}
                         tooltip="Pourcentage des TR réellement consommés"
+                        disabled={advancedCollapsed}
                       />
                       <InputField
                         id="E"
@@ -374,6 +376,7 @@ export default function App() {
                         onChange={(v) => setInputs({ ...inputs, E: v })}
                         suffix="€ / mois"
                         tooltip="Montant mensuel des dépenses éligibles (courses/resto) qui peuvent être payées en TR"
+                        disabled={advancedCollapsed}
                       />
                       <label className="flex flex-col gap-4 rounded-2xl border border-gray-200/80 bg-white/70 p-4 shadow-sm transition-colors duration-300 ease-out dark:border-gray-700/60 dark:bg-gray-900/40 sm:col-span-2">
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
@@ -414,7 +417,7 @@ export default function App() {
                           className={`w-full accent-rose-500 transition-transform duration-200 ease-out ${
                             biasHighlight ? "scale-[1.01]" : "scale-100"
                           }`}
-                          disabled={biasDisabled}
+                          disabled={advancedCollapsed || biasDisabled}
                         />
                         <div className="flex justify-between text-[11px] font-medium uppercase tracking-wide text-gray-400">
                           <span>Favoriser {partnerAName}</span>

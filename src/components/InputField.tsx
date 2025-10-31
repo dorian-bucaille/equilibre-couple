@@ -11,6 +11,7 @@ type Props = {
   step?: number;
   suffix?: string;
   tooltip?: string;
+  disabled?: boolean;
 };
 
 export const InputField: React.FC<Props> = ({
@@ -23,6 +24,7 @@ export const InputField: React.FC<Props> = ({
   step,
   suffix,
   tooltip,
+  disabled = false,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = event.target.value;
@@ -34,7 +36,7 @@ export const InputField: React.FC<Props> = ({
     <label htmlFor={id} className="flex flex-col gap-2">
       <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
         <span>{label}</span>
-        {tooltip ? <InfoIcon title={tooltip} tooltipId={`${id}-tip`} /> : null}
+        {tooltip ? <InfoIcon title={tooltip} tooltipId={`${id}-tip`} disabled={disabled} /> : null}
       </div>
       <div className="relative">
         <input
@@ -47,8 +49,9 @@ export const InputField: React.FC<Props> = ({
           min={min}
           max={max}
           step={step ?? 1}
-          aria-describedby={tooltip ? `${id}-tip` : undefined}
+          aria-describedby={tooltip && !disabled ? `${id}-tip` : undefined}
           style={suffix ? { paddingRight: "7rem" } : undefined}
+          disabled={disabled}
         />
         {suffix ? (
           <span
