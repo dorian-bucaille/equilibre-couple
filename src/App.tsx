@@ -10,6 +10,7 @@ import { loadState, saveState } from "./lib/storage";
 import { useCollapse } from "./hooks/useCollapse";
 import "./styles.css";
 import { TextField } from "./components/TextField";
+import { FairnessInfoCard } from "./components/FairnessInfoCard";
 
 const DEFAULTS: Inputs = {
   partnerAName: "Partenaire A",
@@ -265,6 +266,7 @@ export default function App() {
       </section>
 
       <SummaryCard r={result} partnerAName={partnerAName} partnerBName={partnerBName} />
+      <FairnessInfoCard />
       <DetailsCard r={result} />
 
       {result.warnings.length > 0 && (
