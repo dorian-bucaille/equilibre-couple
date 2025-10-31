@@ -1,27 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+/* eslint-env browser */
+import React, { useState } from "react";
 import type { Result } from "../lib/types";
+import { useCollapse } from "../hooks/useCollapse";
 
 export const DetailsCard: React.FC<{ r: Result }> = ({ r }) => {
   const [open, setOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    if (open) {
-      const height = el.scrollHeight;
-      el.style.maxHeight = `${height}px`;
-      el.style.opacity = "1";
-      el.style.transform = "translateY(0)";
-      el.style.pointerEvents = "auto";
-    } else {
-      el.style.maxHeight = "0px";
-      el.style.opacity = "0";
-      el.style.transform = "translateY(-0.5rem)";
-      el.style.pointerEvents = "none";
-    }
-  }, [open, r]);
+  const containerRef = useCollapse(open);
 
   return (
     <div className="card">
