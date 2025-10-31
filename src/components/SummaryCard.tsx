@@ -4,41 +4,58 @@ import type { Result } from "../lib/types";
 
 type Segment = {
   label: string;
-  value: number;
+  amount: number;
   color: string;
-  formattedValue: string;
 };
+
+type DisplayMode = "amount" | "percent";
 
 const Chart: React.FC<{
   title: string;
   centerLabel: string;
-  centerValue: string;
+  displayMode: DisplayMode;
   segments: Segment[];
-}> = ({ title, centerLabel, centerValue, segments }) => {
-  const total = segments.reduce((acc, cur) => acc + cur.value, 0);
+  actions?: React.ReactNode;
+}> = ({ title, centerLabel, displayMode, segments, actions }) => {
+  const total = segments.reduce((acc, cur) => acc + cur.amount, 0);
   const hasValues = total > 0;
   let cumulative = 0;
   const gradient = hasValues
     ? segments
         .map((segment) => {
           const start = cumulative;
-          const delta = (segment.value / total) * 100;
+          const delta = total === 0 ? 0 : (segment.amount / total) * 100;
           cumulative += delta;
           return `${segment.color} ${start}% ${cumulative}%`;
         })
         .join(", ")
     : "var(--chart-empty) 0% 100%";
 
+  const formatValue = (segment: Segment) => {
+    if (displayMode === "percent") {
+      const ratio = hasValues ? segment.amount / total : 0;
+      return pct(ratio);
+    }
+    return euro(segment.amount);
+  };
+
+  const centerValue = displayMode === "percent"
+    ? pct(hasValues ? 1 : 0)
+    : euro(total);
+
   return (
     <div className="flex flex-col items-center gap-3">
-      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-        {title}
-      </h3>
+      <div className="flex w-full items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+          {title}
+        </h3>
+        {actions}
+      </div>
       <div
         className="relative h-32 w-32"
         role="img"
         aria-label={`${title}: ${segments
-          .map((segment) => `${segment.label} ${segment.formattedValue}`)
+          .map((segment) => `${segment.label} ${formatValue(segment)}`)
           .join(", ")}`}
       >
         <div
@@ -65,7 +82,7 @@ const Chart: React.FC<{
               {segment.label}
             </span>
             <span className="font-medium text-gray-900 dark:text-gray-100">
-              {segment.formattedValue}
+              {formatValue(segment)}
             </span>
           </div>
         ))}
@@ -75,35 +92,28 @@ const Chart: React.FC<{
 };
 
 export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
-  const shareSegments: Segment[] = [
-    {
-      label: "Part partenaire A",
-      value: Math.max(r.shareD_biased, 0),
-      color: "var(--chart-a)",
-      formattedValue: pct(r.shareD_biased),
-    },
-    {
-      label: "Part partenaire B",
-      value: Math.max(r.shareM_biased, 0),
-      color: "var(--chart-b)",
-      formattedValue: pct(r.shareM_biased),
-    },
-  ];
+  const [displayMode, setDisplayMode] = React.useState<DisplayMode>("percent");
 
-  const rawTotalDeposits = r.depositD + r.depositM;
-  const totalDeposits = Math.max(rawTotalDeposits, 0);
-  const depositSegments: Segment[] = [
+  const contributionSegments: Segment[] = [
     {
       label: "Dépôt partenaire A",
-      value: Math.max(r.depositD, 0),
-      color: "var(--chart-a)",
-      formattedValue: euro(r.depositD),
+      amount: Math.max(r.depositD, 0),
+      color: "var(--chart-a-deposit)",
+    },
+    {
+      label: "TR partenaire A",
+      amount: Math.max(r.usedTRA, 0),
+      color: "var(--chart-a-tr)",
     },
     {
       label: "Dépôt partenaire B",
-      value: Math.max(r.depositM, 0),
-      color: "var(--chart-b)",
-      formattedValue: euro(r.depositM),
+      amount: Math.max(r.depositM, 0),
+      color: "var(--chart-b-deposit)",
+    },
+    {
+      label: "TR partenaire B",
+      amount: Math.max(r.usedTRB, 0),
+      color: "var(--chart-b-tr)",
     },
   ];
 
@@ -152,18 +162,40 @@ export const SummaryCard: React.FC<{ r: Result }> = ({ r }) => {
 
       <hr className="my-4 border-gray-200 dark:border-gray-800" />
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <Chart
-          title="Répartition des parts"
-          centerLabel="Part A"
-          centerValue={pct(r.shareD_biased)}
-          segments={shareSegments}
-        />
+      <div className="flex justify-center">
         <Chart
           title="Répartition des contributions"
-          centerLabel="Dépôts"
-          centerValue={euro(rawTotalDeposits)}
-          segments={depositSegments}
+          centerLabel={displayMode === "percent" ? "Total (%)" : "Total (€)"}
+          displayMode={displayMode}
+          segments={contributionSegments}
+          actions={
+            <div className="flex rounded-md border border-gray-200 bg-white p-0.5 text-xs font-medium shadow-sm dark:border-gray-700 dark:bg-gray-900">
+              <button
+                type="button"
+                className={`rounded-sm px-2 py-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 dark:focus-visible:ring-rose-300 ${
+                  displayMode === "amount"
+                    ? "bg-rose-500 text-white dark:bg-rose-400"
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                }`}
+                onClick={() => setDisplayMode("amount")}
+                aria-pressed={displayMode === "amount"}
+              >
+                €
+              </button>
+              <button
+                type="button"
+                className={`rounded-sm px-2 py-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400 dark:focus-visible:ring-rose-300 ${
+                  displayMode === "percent"
+                    ? "bg-rose-500 text-white dark:bg-rose-400"
+                    : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                }`}
+                onClick={() => setDisplayMode("percent")}
+                aria-pressed={displayMode === "percent"}
+              >
+                %
+              </button>
+            </div>
+          }
         />
       </div>
     </div>
