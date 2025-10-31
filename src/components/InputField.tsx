@@ -14,29 +14,49 @@ type Props = {
 };
 
 export const InputField: React.FC<Props> = ({
-  id, label, value, onChange, min, max, step, suffix, tooltip
+  id,
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  suffix,
+  tooltip,
 }) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.target.value;
+    const numeric = rawValue === "" ? 0 : parseFloat(rawValue);
+    onChange(Number.isFinite(numeric) ? numeric : 0);
+  };
+
   return (
-    <label htmlFor={id} className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
-        <span className="font-medium">{label}</span>
+    <label htmlFor={id} className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+        <span>{label}</span>
         {tooltip ? <InfoIcon title={tooltip} tooltipId={`${id}-tip`} /> : null}
       </div>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+      <div className="relative">
         <input
           id={id}
           type="number"
           inputMode="decimal"
-          className="input w-full sm:w-auto sm:flex-1 min-w-0"
+          className="input w-full"
           value={Number.isFinite(value) ? value : 0}
-          onChange={(e) => onChange(parseFloat(e.target.value || "0"))}
+          onChange={handleChange}
           min={min}
           max={max}
           step={step ?? 1}
           aria-describedby={tooltip ? `${id}-tip` : undefined}
+          style={suffix ? { paddingRight: "7rem" } : undefined}
         />
         {suffix ? (
-          <span className="text-sm text-gray-500 sm:whitespace-nowrap">{suffix}</span>
+          <span
+            className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-gray-500 dark:text-gray-400"
+            aria-hidden="true"
+          >
+            {suffix}
+          </span>
         ) : null}
       </div>
     </label>
