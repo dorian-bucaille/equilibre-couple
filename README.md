@@ -80,6 +80,10 @@ Une fois la build terminée, l'URL Netlify générée peut être partagée direc
 - [Vite](https://vitejs.dev/) pour le bundling et le serveur de développement.
 - [Tailwind CSS](https://tailwindcss.com/) pour le style et les composants utilitaires.
 
+### Attribut `lang` du document
+
+Le fichier `index.html` laisse volontairement vide l’attribut `lang` sur `<html>`. Lors du montage, `App` observe `i18n.language` et synchronise `document.documentElement.lang` pour refléter la langue active (FR par défaut tant que l’instance i18next n’a pas été initialisée). Toute nouvelle locale ajoutée via i18next se propage donc automatiquement à l’attribut HTML afin d’améliorer l’accessibilité et le SEO.
+
 ## Contribution
 
 Les contributions sont bienvenues. Merci de proposer vos améliorations via des issues ou des pull requests. Pensez à lancer les tests avant de soumettre votre PR :
