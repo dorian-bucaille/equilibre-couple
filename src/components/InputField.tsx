@@ -13,6 +13,7 @@ type Props = {
   suffix?: string;
   tooltip?: string;
   disabled?: boolean;
+  align?: "left" | "center";
 };
 
 const formatNumberValue = (val: number) =>
@@ -29,6 +30,7 @@ export const InputField: React.FC<Props> = ({
   suffix,
   tooltip,
   disabled = false,
+  align = "left",
 }) => {
   const { t } = useTranslation();
   const [rawValue, setRawValue] = React.useState<string>(() => formatNumberValue(value));
@@ -119,9 +121,14 @@ export const InputField: React.FC<Props> = ({
     hasError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-400/40 dark:border-rose-400/60" : ""
   }`;
 
+  const labelClassName = `flex flex-col gap-2 ${align === "center" ? "text-center" : ""}`;
+  const labelHeaderClassName = `flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 ${
+    align === "center" ? "justify-center" : ""
+  }`;
+
   return (
-    <label htmlFor={id} className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+    <label htmlFor={id} className={labelClassName}>
+      <div className={labelHeaderClassName}>
         <span>{label}</span>
         {tooltip ? <InfoIcon title={tooltip} tooltipId={`${id}-tip`} disabled={disabled} /> : null}
       </div>

@@ -134,6 +134,14 @@ const resources: Resource = {
           deposit: "Dépôt {{name}}",
           tr: "TR {{name}}",
         },
+        simple: {
+          title: "Résumé express",
+          description: "Vue ultra-simple pour visualiser l’équilibre en un coup d’œil.",
+          cashLabel: "Budget commun hors TR",
+          cashHelper: "Montant total à déposer ce mois-ci.",
+          chartTitle: "Répartition des dépôts",
+          chartCenter: "Total à déposer",
+        },
         saveBlock: {
           title: "Sauvegarder cette configuration",
           description: "Les enregistrements sont stockés localement sur cet appareil.",
@@ -430,6 +438,14 @@ const resources: Resource = {
           centerAmount: "Total (€)",
           deposit: "Deposit {{name}}",
           tr: "Voucher {{name}}",
+        },
+        simple: {
+          title: "Quick summary",
+          description: "A super simple snapshot to explain the balance at a glance.",
+          cashLabel: "Shared budget (cash only)",
+          cashHelper: "Total amount to wire this month.",
+          chartTitle: "Deposits split",
+          chartCenter: "Total deposit",
         },
         saveBlock: {
           title: "Save this configuration",

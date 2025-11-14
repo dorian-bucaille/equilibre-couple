@@ -11,6 +11,7 @@ type HistorySectionProps = {
   partnerAName: string;
   partnerBName: string;
   mode: SplitMode;
+  advanced: boolean;
   onLoadHistory: (item: HistoryItem) => void;
   onHistoryCleared: () => void;
   children?: React.ReactNode;
@@ -22,6 +23,7 @@ export function HistorySection({
   partnerAName,
   partnerBName,
   mode,
+  advanced,
   onLoadHistory,
   onHistoryCleared,
   children,
@@ -43,17 +45,20 @@ export function HistorySection({
         partnerAName={partnerAName}
         partnerBName={partnerBName}
         mode={mode}
-        onSaveHistory={handleSummarySave}
-        onFocusNote={handleSummaryFocusNote}
+        advanced={advanced}
+        onSaveHistory={advanced ? handleSummarySave : undefined}
+        onFocusNote={advanced ? handleSummaryFocusNote : undefined}
       />
-      {children}
-      <History
-        ref={historyRef}
-        inputs={inputs}
-        result={result}
-        onLoad={onLoadHistory}
-        onRequestClearAll={onHistoryCleared}
-      />
+      {advanced ? children : null}
+      {advanced ? (
+        <History
+          ref={historyRef}
+          inputs={inputs}
+          result={result}
+          onLoad={onLoadHistory}
+          onRequestClearAll={onHistoryCleared}
+        />
+      ) : null}
     </>
   );
 }

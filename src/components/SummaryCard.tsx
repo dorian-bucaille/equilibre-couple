@@ -127,14 +127,84 @@ const SummaryStat: React.FC<{
   );
 };
 
-export const SummaryCard: React.FC<{
+type SummaryCardProps = {
   r: Result;
   partnerAName: string;
   partnerBName: string;
   mode: SplitMode;
+  advanced: boolean;
   onSaveHistory?: () => void;
   onFocusNote?: () => void;
-}> = ({ r, partnerAName, partnerBName, mode, onSaveHistory, onFocusNote }) => {
+};
+
+type SummaryCardBaseProps = Omit<SummaryCardProps, "advanced">;
+
+const SimpleSummary: React.FC<SummaryCardBaseProps> = ({ r, partnerAName, partnerBName, mode }) => {
+  const { t } = useTranslation();
+  const isEqualLeftover = mode === "equal_leftover";
+  const modeAnnouncement = isEqualLeftover
+    ? t("parameters.modes.equal_leftover.announcement")
+    : t("parameters.modes.proportional.announcement");
+
+  const simplifiedSegments: Segment[] = [
+    {
+      label: t("summary.chart.deposit", { name: partnerAName }),
+      amount: Math.max(r.depositD, 0),
+      color: "var(--chart-a-deposit)",
+    },
+    {
+      label: t("summary.chart.deposit", { name: partnerBName }),
+      amount: Math.max(r.depositM, 0),
+      color: "var(--chart-b-deposit)",
+    },
+  ];
+
+  return (
+    <div className="card space-y-6">
+      <div className="space-y-1 text-center">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t("summary.simple.title")}</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{t("summary.simple.description")}</p>
+      </div>
+      <div aria-live="polite" className="sr-only">
+        {modeAnnouncement}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <SummaryStat
+          label={t("summary.labels.share", { name: partnerAName })}
+          value={pct(r.shareD_biased)}
+          emphasis="large"
+        />
+        <SummaryStat
+          label={t("summary.labels.share", { name: partnerBName })}
+          value={pct(r.shareM_biased)}
+          emphasis="large"
+        />
+      </div>
+      <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 text-center shadow-sm dark:border-gray-700/60 dark:bg-gray-900/40">
+        <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+          {t("summary.simple.cashLabel")}
+        </p>
+        <p className="mt-2 text-3xl font-semibold text-gray-900 dark:text-gray-100">{euro(r.cashNeeded)}</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t("summary.simple.cashHelper")}</p>
+      </div>
+      <Chart
+        title={t("summary.simple.chartTitle")}
+        centerLabel={t("summary.simple.chartCenter")}
+        displayMode="amount"
+        segments={simplifiedSegments}
+      />
+    </div>
+  );
+};
+
+const AdvancedSummary: React.FC<SummaryCardBaseProps> = ({
+  r,
+  partnerAName,
+  partnerBName,
+  mode,
+  onSaveHistory,
+  onFocusNote,
+}) => {
   const { t } = useTranslation();
   const [displayMode, setDisplayMode] = React.useState<DisplayMode>("percent");
   const isEqualLeftover = mode === "equal_leftover";
@@ -267,3 +337,6 @@ export const SummaryCard: React.FC<{
     </div>
   );
 };
+
+export const SummaryCard: React.FC<SummaryCardProps> = ({ advanced, ...rest }) =>
+  advanced ? <AdvancedSummary {...rest} /> : <SimpleSummary {...rest} />;

@@ -50,6 +50,8 @@ export function ParametersForm({
   const ticketsTooltipB = t("parameters.ticketsTooltip", { name: partnerBName });
   const sharedBudgetTooltip = t("parameters.sharedBudgetTooltip");
 
+  const showAdvanced = inputs.advanced;
+
   return (
     <section className="card space-y-6">
       <div className="space-y-1">
@@ -132,33 +134,40 @@ export function ParametersForm({
           suffix={suffixEuroMonth}
           tooltip={salaryTooltipB}
         />
-        <InputField
-          id="a2"
-          label={ticketsLabelA}
-          value={inputs.a2}
-          onChange={(v) => onInputsChange((prev) => ({ ...prev, a2: v }))}
-          min={0}
-          suffix={suffixEuroMonth}
-          tooltip={ticketsTooltipA}
-        />
-        <InputField
-          id="b2"
-          label={ticketsLabelB}
-          value={inputs.b2}
-          onChange={(v) => onInputsChange((prev) => ({ ...prev, b2: v }))}
-          min={0}
-          suffix={suffixEuroMonth}
-          tooltip={ticketsTooltipB}
-        />
-        <InputField
-          id="m"
-          label={sharedBudgetLabel}
-          value={inputs.m}
-          onChange={(v) => onInputsChange((prev) => ({ ...prev, m: v }))}
-          min={0}
-          suffix={suffixEuroMonth}
-          tooltip={sharedBudgetTooltip}
-        />
+        {showAdvanced && (
+          <>
+            <InputField
+              id="a2"
+              label={ticketsLabelA}
+              value={inputs.a2}
+              onChange={(v) => onInputsChange((prev) => ({ ...prev, a2: v }))}
+              min={0}
+              suffix={suffixEuroMonth}
+              tooltip={ticketsTooltipA}
+            />
+            <InputField
+              id="b2"
+              label={ticketsLabelB}
+              value={inputs.b2}
+              onChange={(v) => onInputsChange((prev) => ({ ...prev, b2: v }))}
+              min={0}
+              suffix={suffixEuroMonth}
+              tooltip={ticketsTooltipB}
+            />
+          </>
+        )}
+        <div className="sm:col-span-2">
+          <InputField
+            id="m"
+            label={sharedBudgetLabel}
+            value={inputs.m}
+            onChange={(v) => onInputsChange((prev) => ({ ...prev, m: v }))}
+            min={0}
+            suffix={suffixEuroMonth}
+            tooltip={sharedBudgetTooltip}
+            align="center"
+          />
+        </div>
         <div className="sm:col-span-2">
           <div className="rounded-3xl border border-dashed border-rose-200/80 bg-white/70 p-4 shadow-sm transition-colors duration-300 ease-out dark:border-rose-500/40 dark:bg-gray-900/40">
             <button
