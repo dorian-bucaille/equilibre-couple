@@ -294,7 +294,7 @@ const resources: Resource = {
           contributionEquivalent:
             "Contribution équivalente: {{partnerAName}}={{valueA}} €, {{partnerBName}}={{valueB}} €",
           cashDeposits:
-            "Dépôts cash: {{partnerAName}}={{valueA}} €, {{partnerBName}}={{valueB}} € (somme cash={{total}} €)",
+            "Dépôts cash: {{partnerAName}}={{valueA}} €, {{partnerBName}}={{valueB}} € (somme cash = {{total}} €)",
           equalModeIntro: "Mode reste à vivre égal : chacun conserve le même reste cash.",
           equalEquation:
             "Égalité du reste cash: {{sa}} - dépôt {{partnerAName}} = {{sb}} - dépôt {{partnerBName}}",
@@ -587,7 +587,7 @@ const resources: Resource = {
           contributionEquivalent:
             "Equivalent contribution: {{partnerAName}}={{valueA}} €, {{partnerBName}}={{valueB}} €",
           cashDeposits:
-            "Cash deposits: {{partnerAName}}={{valueA}} €, {{partnerBName}}={{valueB}} € (cash total={{total}} €)",
+            "Cash deposits: {{partnerAName}}={{valueA}} €, {{partnerBName}}={{valueB}} € (cash total = {{total}} €)",
           equalModeIntro: "Equal leftover mode: both keep the same remaining cash.",
           equalEquation:
             "Equal remaining cash: {{sa}} - deposit {{partnerAName}} = {{sb}} - deposit {{partnerBName}}",
