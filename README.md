@@ -44,6 +44,26 @@ Ouvrez ensuite http://localhost:5173 dans votre navigateur pour interagir avec l
 | `npm test`        | Exécute la suite de tests en mode non interactif.                 |
 | `npm run lint`    | Lance ESLint sur les fichiers TypeScript et React du dossier `src`. |
 
+## Intégration continue
+
+Une action GitHub (`.github/workflows/ci.yml`) vérifie automatiquement chaque push et pull request vers `main` avec Node.js 18 et 20.
+
+- `npm ci` installe les dépendances en s'appuyant sur le cache npm d'`actions/setup-node` pour accélérer les ré-exécutions.
+- `npm run lint`, `npm test` et `npm run build` s'assurent que le code reste propre, couvert par les tests et prêt pour la production.
+- Un job optionnel Lighthouse (via `npm run lighthouse:ci`) s'exécute sur la branche `main` après la réussite des autres jobs pour vérifier la performance et l'accessibilité de la build.
+
+Les résultats sont visibles dans l'onglet **Actions** du dépôt. En cas d'échec, corrigez les erreurs en local, relancez les commandes ci-dessus puis poussez vos correctifs.
+
+### Protection de la branche `main`
+
+Activez la protection de branche dans les paramètres GitHub du dépôt (Settings → Branches → Branch protection rules) afin de :
+
+1. Cibler la branche `main`.
+2. Exiger la réussite du workflow « CI » avant fusion.
+3. Empêcher les commits directs pour favoriser les pull requests revues.
+
+Cela garantit que seule une base testée et auditée atteint la production.
+
 ## Déploiement
 
 Le projet est prêt pour un déploiement sur Netlify :
