@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { InfoIcon } from "./InfoIcon";
 
 type Props = {
@@ -14,6 +15,9 @@ type Props = {
   disabled?: boolean;
 };
 
+const formatNumberValue = (val: number) =>
+  typeof val === "number" && Number.isFinite(val) ? String(val) : "";
+
 export const InputField: React.FC<Props> = ({
   id,
   label,
@@ -26,11 +30,94 @@ export const InputField: React.FC<Props> = ({
   tooltip,
   disabled = false,
 }) => {
+  const { t } = useTranslation();
+  const [rawValue, setRawValue] = React.useState<string>(() => formatNumberValue(value));
+  const [isFocused, setIsFocused] = React.useState(false);
+
+  const clampValue = React.useCallback(
+    (next: number) => {
+      let result = next;
+      if (typeof min === "number") {
+        result = Math.max(min, result);
+      }
+      if (typeof max === "number") {
+        result = Math.min(max, result);
+      }
+      return result;
+    },
+    [min, max],
+  );
+
+  const numericValue = rawValue === "" ? undefined : Number(rawValue);
+  const isNumeric = typeof numericValue === "number" && Number.isFinite(numericValue);
+  const isBelowMin = isNumeric && typeof min === "number" && numericValue < min;
+  const isAboveMax = isNumeric && typeof max === "number" && numericValue > max;
+  const hasError = !disabled && (isBelowMin || isAboveMax);
+  const errorMessage = hasError
+    ? typeof min === "number" && typeof max === "number"
+      ? t("parameters.errors.range", { min, max })
+      : isBelowMin
+        ? t("parameters.errors.min", { min })
+        : t("parameters.errors.max", { max })
+    : undefined;
+
+  React.useEffect(() => {
+    if (isFocused) return;
+    const formatted = formatNumberValue(value);
+    setRawValue((current) => (current === formatted ? current : formatted));
+  }, [value, isFocused]);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = event.target.value;
-    const numeric = rawValue === "" ? 0 : parseFloat(rawValue);
-    onChange(Number.isFinite(numeric) ? numeric : 0);
+    const nextRaw = event.target.value;
+    setRawValue(nextRaw);
+
+    if (nextRaw === "" || nextRaw === "-" || nextRaw === "+") {
+      return;
+    }
+
+    const parsed = Number(nextRaw);
+    if (!Number.isFinite(parsed)) {
+      return;
+    }
+
+    const clamped = clampValue(parsed);
+    onChange(clamped);
   };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    if (rawValue === "") {
+      setRawValue(formatNumberValue(value));
+      return;
+    }
+
+    const parsed = Number(rawValue);
+    if (!Number.isFinite(parsed)) {
+      setRawValue(formatNumberValue(value));
+      return;
+    }
+
+    const clamped = clampValue(parsed);
+    if (clamped !== value) {
+      onChange(clamped);
+    }
+    setRawValue(formatNumberValue(clamped));
+  };
+
+  const handleFocus = () => setIsFocused(true);
+
+  const describedBy = [] as string[];
+  if (tooltip && !disabled) {
+    describedBy.push(`${id}-tip`);
+  }
+  if (hasError) {
+    describedBy.push(`${id}-error`);
+  }
+  const ariaDescribedBy = describedBy.length > 0 ? describedBy.join(" ") : undefined;
+
+  const inputClassName = `input w-full ${
+    hasError ? "border-rose-400 focus:border-rose-500 focus:ring-rose-400/40 dark:border-rose-400/60" : ""
+  }`;
 
   return (
     <label htmlFor={id} className="flex flex-col gap-2">
@@ -43,13 +130,16 @@ export const InputField: React.FC<Props> = ({
           id={id}
           type="number"
           inputMode="decimal"
-          className="input w-full"
-          value={Number.isFinite(value) ? value : 0}
+          className={inputClassName}
+          value={rawValue}
           onChange={handleChange}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           min={min}
           max={max}
           step={step ?? 1}
-          aria-describedby={tooltip && !disabled ? `${id}-tip` : undefined}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={hasError || undefined}
           style={suffix ? { paddingRight: "7rem" } : undefined}
           disabled={disabled}
         />
@@ -62,6 +152,11 @@ export const InputField: React.FC<Props> = ({
           </span>
         ) : null}
       </div>
+      {hasError && errorMessage ? (
+        <span id={`${id}-error`} className="field-help text-rose-600 dark:text-rose-300">
+          {errorMessage}
+        </span>
+      ) : null}
     </label>
   );
 };
