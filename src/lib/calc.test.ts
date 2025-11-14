@@ -49,6 +49,16 @@ describe("calculate", () => {
     expect(r.leftoverA).toBeCloseTo(r.leftoverB, 2);
   });
 
+  it("equal leftover ignores bias points", () => {
+    const baseEqual = { ...base, mode: "equal_leftover", a1: 2500, b: 2000, m: 1600 };
+    const rNeutral = calculate(baseEqual);
+    const rBiased = calculate({ ...baseEqual, biasPts: 12 });
+
+    expect(rBiased.shareD_biased).toBeCloseTo(rNeutral.shareD_biased, 5);
+    expect(rBiased.depositD).toBeCloseTo(rNeutral.depositD, 2);
+    expect(rBiased.depositM).toBeCloseTo(rNeutral.depositM, 2);
+  });
+
   it("equal leftover advanced with eligible expenses", () => {
     const inp: Inputs = {
       ...base,
