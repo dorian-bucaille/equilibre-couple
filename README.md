@@ -36,14 +36,13 @@ Ouvrez ensuite http://localhost:5173 dans votre navigateur pour interagir avec l
 
 ### Scripts disponibles
 
-| Commande        | Description                                               |
-|-----------------|-----------------------------------------------------------|
-| `npm run dev`   | Lance le serveur de développement Vite avec rechargement. |
-| `npm run build` | Génère la version de production dans le dossier `dist`.    |
-| `npm test`      | Exécute la suite de tests.                                |
-| `npm run lint`* | (Optionnel) Lance le linter si configuré.                 |
-
-\*La commande `npm run lint` n'est pas fournie par défaut mais peut être ajoutée selon les besoins.
+| Commande          | Description                                                       |
+|-------------------|-------------------------------------------------------------------|
+| `npm run dev`     | Lance le serveur de développement Vite avec rechargement.         |
+| `npm run build`   | Génère la version de production dans le dossier `dist`.            |
+| `npm run preview` | Sert la build de production en local pour vérifier le résultat.    |
+| `npm test`        | Exécute la suite de tests en mode non interactif.                 |
+| `npm run lint`    | Lance ESLint sur les fichiers TypeScript et React du dossier `src`. |
 
 ## Déploiement
 
