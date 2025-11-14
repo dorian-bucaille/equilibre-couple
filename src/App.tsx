@@ -15,6 +15,7 @@ import { loadState, saveState, type HistoryItem } from "./lib/storage";
 import { useCollapse } from "./hooks/useCollapse";
 import "./styles.css";
 import { TextField } from "./components/TextField";
+import { ThemeToggle } from "./components/ThemeToggle";
 
 const DEFAULTS: Inputs = {
   partnerAName: "",
@@ -552,30 +553,6 @@ function areInputsEqual(a: Inputs, b: Inputs) {
   ];
 
   return keys.every((key) => a[key] === b[key]);
-}
-
-function ThemeToggle() {
-  const { t } = useTranslation();
-  const [dark, setDark] = useState(
-    () => window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches,
-  );
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (dark) root.classList.add("dark");
-    else root.classList.remove("dark");
-  }, [dark]);
-
-  return (
-    <button
-      className="btn btn-ghost transition-transform duration-300 ease-out hover:scale-105 active:scale-95"
-      onClick={() => setDark((d) => !d)}
-      aria-pressed={dark}
-      aria-label={t("accessibility.toggleDarkMode")}
-    >
-      {dark ? "🌙" : "☀️"}
-    </button>
-  );
 }
 
 function LanguageSwitcher() {
