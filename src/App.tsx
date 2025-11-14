@@ -3,6 +3,7 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { calculate } from "./lib/calc";
 import type { Inputs, SplitMode } from "./lib/types";
+import { readNumericParam } from "./lib/searchParams";
 import { InputField } from "./components/InputField";
 import { SummaryCard } from "./components/SummaryCard";
 import { CalculationInfoCard } from "./components/CalculationInfoCard";
@@ -32,8 +33,10 @@ const DEFAULTS: Inputs = {
 
 function parseQuery(defaults: Inputs): Inputs {
   const u = new URL(window.location.href);
-  const g = (k: keyof Inputs) => u.searchParams.get(String(k));
-  const num = (v: string | null, d: number) => (v ? Number(v) : d);
+  const params = u.searchParams;
+  const g = (k: keyof Inputs) => params.get(String(k));
+  const num = (key: keyof Inputs, fallback: number) =>
+    readNumericParam(params, String(key), fallback);
   const modeParam = u.searchParams.get("mode");
   const mode: SplitMode =
     modeParam === "equal_leftover"
@@ -44,15 +47,15 @@ function parseQuery(defaults: Inputs): Inputs {
   return {
     partnerAName: (u.searchParams.get("nameA") ?? defaults.partnerAName) || "",
     partnerBName: (u.searchParams.get("nameB") ?? defaults.partnerBName) || "",
-    a1: num(g("a1"), defaults.a1),
-    a2: num(g("a2"), defaults.a2),
-    b2: num(g("b2"), defaults.b2),
-    trPct: num(g("trPct"), defaults.trPct),
-    b: num(g("b"), defaults.b),
-    m: num(g("m"), defaults.m),
+    a1: num("a1", defaults.a1),
+    a2: num("a2", defaults.a2),
+    b2: num("b2", defaults.b2),
+    trPct: num("trPct", defaults.trPct),
+    b: num("b", defaults.b),
+    m: num("m", defaults.m),
     advanced: g("advanced") ? g("advanced") === "1" : defaults.advanced,
-    E: num(g("E"), defaults.E),
-    biasPts: num(g("biasPts"), defaults.biasPts),
+    E: num("E", defaults.E),
+    biasPts: num("biasPts", defaults.biasPts),
     mode,
   };
 }
