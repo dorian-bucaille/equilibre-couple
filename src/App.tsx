@@ -96,6 +96,7 @@ export default function App() {
             partnerAName={partnerAName}
             partnerBName={partnerBName}
             mode={inputs.mode}
+            advanced={inputs.advanced}
             onLoadHistory={handleLoadHistory}
             onHistoryCleared={handleHistoryCleared}
           >

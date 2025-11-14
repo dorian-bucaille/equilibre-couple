@@ -36,10 +36,13 @@ export function HeaderActions({
           <p className="text-sm text-gray-600 dark:text-gray-300">{t("header.description")}</p>
         </div>
         <div className="no-print flex flex-col items-center gap-3 md:items-end">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 md:justify-end">
             <LanguageSwitcher />
             <ThemeToggle />
             {showGlossary ? <GlossaryButton /> : null}
+            <button onClick={onReset} className="btn btn-ghost text-rose-600 hover:text-rose-700">
+              {t("actions.reset")}
+            </button>
           </div>
           <div className="flex flex-wrap justify-center gap-2 md:justify-end">
             <a
@@ -67,9 +70,6 @@ export function HeaderActions({
             </div>
             <button onClick={onPrint} className="btn btn-ghost">
               {t("actions.print")}
-            </button>
-            <button onClick={onReset} className="btn btn-danger">
-              {t("actions.reset")}
             </button>
           </div>
         </div>
