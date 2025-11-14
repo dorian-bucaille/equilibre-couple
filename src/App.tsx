@@ -5,6 +5,7 @@ import type { HistoryItem } from "./lib/storage";
 import type { Inputs, SplitMode } from "./lib/types";
 import { useInputsState } from "./hooks/useInputsState";
 import { useSharing } from "./hooks/useSharing";
+import { useDocumentLang } from "./hooks/useDocumentLang";
 import { HeaderActions } from "./components/HeaderActions";
 import { ParametersForm } from "./components/ParametersForm";
 import { HistorySection } from "./components/HistorySection";
@@ -13,6 +14,7 @@ import "./styles.css";
 
 export default function App() {
   const { t, i18n } = useTranslation();
+  useDocumentLang(i18n.language);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const { inputs, setInputs, isDirty, resetInputs, loadInputs } = useInputsState();
   const { ariaMessage, setAriaMessage, copyTooltip, copyLink } = useSharing(inputs, t);
