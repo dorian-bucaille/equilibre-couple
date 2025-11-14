@@ -51,6 +51,7 @@ describe("useSharing", () => {
     });
 
     expect(result.current.copyTooltip).toEqual({ message: "error", tone: "error" });
+    expect(result.current.ariaMessage).toBe("error");
   });
 
   it("allows external aria messages", () => {

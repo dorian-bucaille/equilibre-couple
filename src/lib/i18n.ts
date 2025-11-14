@@ -35,7 +35,8 @@ const resources: Resource = {
       actions: {
         copyLink: "Copier le lien",
         copyLinkSuccess: "Lien copié dans le presse-papiers.",
-        copyLinkError: "Impossible de copier le lien automatiquement.",
+        copyLinkError:
+          "Impossible de copier le lien automatiquement. Copiez-le manuellement.",
         print: "Imprimer / PDF",
         reset: "Réinitialiser",
         confirmLoad: "Charger cet enregistrement va remplacer les valeurs actuelles. Continuer ?",
@@ -328,7 +329,7 @@ const resources: Resource = {
       actions: {
         copyLink: "Copy link",
         copyLinkSuccess: "Link copied to the clipboard.",
-        copyLinkError: "Unable to copy the link automatically.",
+        copyLinkError: "Unable to copy the link automatically. Please copy it manually.",
         print: "Print / PDF",
         reset: "Reset",
         confirmLoad: "Loading this entry will replace the current values. Continue?",
