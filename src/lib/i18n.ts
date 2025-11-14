@@ -108,6 +108,11 @@ const resources: Resource = {
           euroMonth: "€ / mois",
           percent: "%",
         },
+        errors: {
+          min: "La valeur doit être supérieure ou égale à {{min}}.",
+          max: "La valeur doit être inférieure ou égale à {{max}}.",
+          range: "La valeur doit être comprise entre {{min}} et {{max}}.",
+        },
       },
       summary: {
         title: "Résumé",
@@ -399,6 +404,11 @@ const resources: Resource = {
         suffix: {
           euroMonth: "€/month",
           percent: "%",
+        },
+        errors: {
+          min: "Value must be greater than or equal to {{min}}.",
+          max: "Value must be less than or equal to {{max}}.",
+          range: "Value must be between {{min}} and {{max}}.",
         },
       },
       summary: {

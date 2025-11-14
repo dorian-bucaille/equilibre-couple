@@ -33,6 +33,7 @@ export function calculate(inputs: Inputs): Result {
   const effectiveTR = effectiveTRA + effectiveTRB;
 
   const eligibleTR = Math.max(0, E);
+  const safeM = Math.max(0, m);
 
   let usedTRA = effectiveTRA;
   let usedTRB = effectiveTRB;
@@ -52,11 +53,11 @@ export function calculate(inputs: Inputs): Result {
 
   const V = advanced ? usedTRA + usedTRB : effectiveTR;
 
-  const potTotal = advanced ? m + eligibleTR : m + V;
+  const potTotal = advanced ? safeM + eligibleTR : safeM + V;
 
   const extraEligibleCash = advanced ? Math.max(0, eligibleTR - V) : 0;
 
-  const cashNeeded = m + extraEligibleCash;
+  const cashNeeded = safeM + extraEligibleCash;
 
   const cashNeededRounded = r2(cashNeeded);
   const SA = Math.max(0, a1);
@@ -105,12 +106,12 @@ export function calculate(inputs: Inputs): Result {
     steps.push(
       advanced
         ? i18n.t("calc.steps.totalPotAdvanced", {
-            m: r2(m),
+            m: r2(safeM),
             eligible: r2(eligibleTR),
             total: r2(potTotal),
           })
         : i18n.t("calc.steps.totalPot", {
-            m: r2(m),
+            m: r2(safeM),
             v: r2(V),
             total: r2(potTotal),
           }),
@@ -119,7 +120,7 @@ export function calculate(inputs: Inputs): Result {
     steps.push(
       advanced
         ? i18n.t("calc.steps.cashNeededAdvanced", {
-            m: r2(m),
+            m: r2(safeM),
             extra,
             cash: r2(cashNeededRounded),
           })

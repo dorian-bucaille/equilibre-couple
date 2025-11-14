@@ -36,6 +36,14 @@ describe("calculate", () => {
     expect(r1.depositD).toBeGreaterThanOrEqual(r0.depositD);
   });
 
+  it("clamps negative shared budget to zero cash need", () => {
+    const inp: Inputs = { ...base, m: -500 };
+    const r = calculate(inp);
+    expect(r.cashNeeded).toBeCloseTo(0, 2);
+    expect(r.depositD).toBeCloseTo(0, 2);
+    expect(r.depositM).toBeCloseTo(0, 2);
+  });
+
   it("bounds negative deposit to zero", () => {
     const inp: Inputs = { ...base, m: 10, biasPts: 10 };
     const r = calculate(inp);
@@ -87,6 +95,21 @@ describe("calculate", () => {
     expect(r.depositD).toBe(0);
     expect(r.depositM).toBeCloseTo(r.cashNeeded, 2);
     expect(r.leftoverA).toBeGreaterThanOrEqual(0);
+  });
+
+  it("keeps advanced totals positive when shared budget is negative", () => {
+    const inp: Inputs = {
+      ...base,
+      advanced: true,
+      m: -200,
+      E: 300,
+      a2: 100,
+      b2: 0,
+      trPct: 100,
+    };
+    const r = calculate(inp);
+    expect(r.potTotal).toBeCloseTo(300, 2);
+    expect(r.cashNeeded).toBeCloseTo(200, 2);
   });
 
   it("proportional mode falls back to 50/50 when weights vanish", () => {

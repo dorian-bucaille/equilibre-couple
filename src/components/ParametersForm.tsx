@@ -119,6 +119,7 @@ export function ParametersForm({
           label={salaryLabelA}
           value={inputs.a1}
           onChange={(v) => onInputsChange((prev) => ({ ...prev, a1: v }))}
+          min={0}
           suffix={suffixEuroMonth}
           tooltip={salaryTooltipA}
         />
@@ -127,6 +128,7 @@ export function ParametersForm({
           label={salaryLabelB}
           value={inputs.b}
           onChange={(v) => onInputsChange((prev) => ({ ...prev, b: v }))}
+          min={0}
           suffix={suffixEuroMonth}
           tooltip={salaryTooltipB}
         />
@@ -135,6 +137,7 @@ export function ParametersForm({
           label={ticketsLabelA}
           value={inputs.a2}
           onChange={(v) => onInputsChange((prev) => ({ ...prev, a2: v }))}
+          min={0}
           suffix={suffixEuroMonth}
           tooltip={ticketsTooltipA}
         />
@@ -143,6 +146,7 @@ export function ParametersForm({
           label={ticketsLabelB}
           value={inputs.b2}
           onChange={(v) => onInputsChange((prev) => ({ ...prev, b2: v }))}
+          min={0}
           suffix={suffixEuroMonth}
           tooltip={ticketsTooltipB}
         />
@@ -151,6 +155,7 @@ export function ParametersForm({
           label={sharedBudgetLabel}
           value={inputs.m}
           onChange={(v) => onInputsChange((prev) => ({ ...prev, m: v }))}
+          min={0}
           suffix={suffixEuroMonth}
           tooltip={sharedBudgetTooltip}
         />
@@ -208,6 +213,7 @@ export function ParametersForm({
                   label={t("parameters.eligibleLabel")}
                   value={inputs.E}
                   onChange={(v) => onInputsChange((prev) => ({ ...prev, E: v }))}
+                  min={0}
                   suffix={suffixEuroMonth}
                   tooltip={t("parameters.eligibleTooltip")}
                   disabled={advancedCollapsed}
